@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Подбор табака — крепость и вкус</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  :root{
+    --ink: #15120E;
+    --surface: #211B15;
+    --surface-raised: #2A231C;
+    --smoke: #EDE6D9;
+    --muted: #A89C8C;
+    --ember: #E6802F;
+    --ember-dim: #7A4A22;
+    --brass: #C9A227;
+    --line: #3C332A;
+    --good: #8FAE6E;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: radial-gradient(120% 140% at 50% -10%, #241d16 0%, var(--ink) 45%, #0f0d0a 100%);
+    color: var(--smoke);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+  }
+
+  .wrap{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  .eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    background: var(--ember);
+    border-radius:50%;
+    box-shadow: 0 0 8px 2px rgba(230,128,47,0.7);
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight: 650;
+    font-size: 32px;
+    line-height: 1.08;
+    margin: 10px 0 6px;
+    letter-spacing: -0.01em;
+  }
+  h1 em{
+    font-style:normal;
+    color: var(--ember);
+  }
+
+  .lead{
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height:1.5;
+    margin: 0 0 28px;
+    max-width: 38ch;
+  }
+
+  /* ---- Gauge (signature element) ---- */
+  .gauge-card{
+    background: linear-gradient(180deg, var(--surface-raised), var(--surface));
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 20px 20px;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gauge-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color: var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .plume-stage{
+    height: 108px;
+    position: relative;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    margin: 6px 0 4px;
+  }
+  .plume-stage svg{ overflow: visible; }
+  .wisp{
+    transform-origin: 100px 130px;
+    filter: blur(0.3px);
+  }
+
+  .readout{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .readout .num{
+    font-family:'Fraunces', serif;
+    font-weight: 800;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--smoke);
+    transition: color .2s ease;
+  }
+  .readout .of{
+    font-family:'JetBrains Mono', monospace;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .readout .word{
+    display:block;
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color: var(--ember);
+    margin-top: 2px;
+  }
+
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height: 28px;
+    background: transparent;
+    margin: 14px 0 2px;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #4a4038, var(--ember-dim) 40%, var(--ember) 100%);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width: 22px; height: 22px;
+    margin-top: -8px;
+    border-radius:50%;
+    background: var(--smoke);
+    border: 3px solid var(--ember);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #4a4038, var(--ember-dim) 40%, var(--ember) 100%);
+  }
+  input[type=range]::-moz-range-thumb{
+    width: 18px; height: 18px;
+    border-radius:50%;
+    background: var(--smoke);
+    border: 3px solid var(--ember);
+    cursor:pointer;
+  }
+
+  .ticks{
+    display:flex;
+    justify-content:space-between;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    padding: 0 2px;
+  }
+
+  /* ---- Flavor chips ---- */
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-weight: 650;
+    font-size: 19px;
+    margin: 4px 0 4px;
+  }
+  .section-sub{
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 14px;
+  }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .chip{
+    font-size: 13.5px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    cursor:pointer;
+    user-select:none;
+    transition: all .15s ease;
+    display:flex; align-items:center; gap:6px;
+  }
+  .chip:hover{ border-color: var(--ember-dim); }
+  .chip.active{
+    background: linear-gradient(180deg, #3a2c1c, #2c2015);
+    border-color: var(--ember);
+    color: var(--smoke);
+    box-shadow: inset 0 0 0 1px rgba(230,128,47,0.25);
+  }
+
+  .optional-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .brand-chips .chip{
+    font-size: 12.5px;
+    padding: 7px 12px;
+  }
+
+  .cta{
+    width:100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(180deg, #ef9146, var(--ember));
+    color: #1a1108;
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    cursor:pointer;
+    box-shadow: 0 8px 20px -6px rgba(230,128,47,0.5);
+    margin-bottom: 26px;
+  }
+  .cta:active{ transform: translateY(1px); }
+
+  .reshuffle-btn{
+    width:100%;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px dashed var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-size: 12.5px;
+    cursor:pointer;
+    margin: -6px 0 14px;
+    transition: all .15s ease;
+  }
+  .reshuffle-btn:hover{ border-color: var(--ember-dim); color: var(--smoke); }
+  .reshuffle-btn:active{ transform: translateY(1px); }
+
+  /* ---- Results ---- */
+  #results{ display:flex; flex-direction:column; gap:12px; }
+
+  .empty{
+    text-align:center;
+    color: var(--muted);
+    font-size: 13.5px;
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    padding: 28px 18px;
+    line-height:1.6;
+  }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 16px 14px;
+    animation: rise .35s ease both;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap: 10px;
+  }
+  .card-name{
+    font-family:'Fraunces', serif;
+    font-weight: 650;
+    font-size: 16.5px;
+    line-height:1.25;
+  }
+  .card-brand{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color: var(--brass);
+    margin-top: 2px;
+  }
+  .strength-badge{
+    flex-shrink:0;
+    width: 40px; height:40px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size: 15px;
+    border: 2px solid var(--ember);
+    color: var(--smoke);
+  }
+  .match-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--good);
+    margin-top: 6px;
+  }
+  .card-tags{
+    display:flex; flex-wrap:wrap; gap:6px;
+    margin: 10px 0 8px;
+  }
+  .tag-pill{
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .card-note{
+    font-size: 13px;
+    color: #C9BFAF;
+    line-height:1.5;
+    margin: 0;
+  }
+
+  .footnote{
+    text-align:center;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 24px;
+    line-height:1.6;
+  }
+
+  /* ---- Community mix list (shared styles reused by curated recipe cards) ---- */
+  /* ---- Shared card styles (used by curated recipe cards) ---- */
+  .source-note{
+    font-size: 12px;
+    color: var(--muted);
+    line-height:1.55;
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .source-note a{ color: var(--brass); }
+
+  .mix-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .mix-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .mix-name{
+    font-family:'Fraunces', serif;
+    font-weight:650;
+    font-size: 15.5px;
+    line-height:1.3;
+  }
+  .mix-rating{
+    flex-shrink:0;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight:700;
+    padding: 4px 9px;
+    border-radius: 8px;
+    background: var(--surface-raised);
+    border: 1px solid var(--ember);
+    color: var(--smoke);
+    white-space:nowrap;
+  }
+  .mix-rating.none{
+    border-color: var(--line);
+    color: var(--muted);
+  }
+  .mix-recipe{
+    font-size: 12.5px;
+    color: #C9BFAF;
+    line-height:1.6;
+    margin: 8px 0 0;
+  }
+  .mix-recipe b{ color: var(--smoke); font-weight:600; }
+  /* ---- Tabs ---- */
+  .tabbar{
+    display:flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 22px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding: 10px 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor:pointer;
+    user-select:none;
+    transition: all .15s ease;
+  }
+  .tab.active{
+    background: linear-gradient(180deg, #3a2c1c, #2c2015);
+    color: var(--smoke);
+    box-shadow: inset 0 0 0 1px rgba(230,128,47,0.3);
+  }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---- Like button ---- */
+  .mix-top{ align-items:flex-start; }
+  .mix-actions{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    flex-shrink:0;
+  }
+  .like-btn{
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface-raised);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    font-size: 16px;
+    line-height:1;
+    color: var(--muted);
+    transition: all .15s ease;
+    flex-shrink:0;
+  }
+  .like-btn:hover{ border-color: var(--ember-dim); }
+  .like-btn.liked{
+    background: linear-gradient(180deg, #3a2418, #2c1a12);
+    border-color: var(--ember);
+    color: var(--ember);
+  }
+  .like-btn.liked:active, .like-btn:active{ transform: scale(0.92); }
+
+  .fav-count-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--ember);
+    color: #1a1108;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight:700;
+    margin-left: 5px;
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Mini App · Табак</div>
+  <h1>Найди свой <em>вкус</em></h1>
+  <p class="lead">Крути крепость по шкале от 1 до 10, отметь любимые вкусовые направления — покажем подходящие миксы.</p>
+
+  <div class="tabbar">
+    <div class="tab active" data-view="picker">Подбор вкуса</div>
+    <div class="tab" data-view="favorites">Избранное<span class="fav-count-badge" id="favCountBadge" style="display:none;">0</span></div>
+  </div>
+
+  <div class="view active" id="view-picker">
+  <div class="gauge-card">
+    <div class="gauge-label"><span>Крепость</span><span id="gaugeHint">1 — лёгкий · 10 — забивает</span></div>
+    <div class="plume-stage">
+      <svg width="200" height="130" viewBox="0 0 200 130" id="plumeSvg">
+        <!-- wisps generated by JS -->
+      </svg>
+    </div>
+    <div class="readout">
+      <span class="num" id="numOut">5</span><span class="of">/ 10</span>
+    </div>
+    <span class="word" id="wordOut">Средний</span>
+    <input type="range" min="1" max="10" step="1" value="5" id="strengthSlider">
+    <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+  </div>
+
+  <div class="section-title">Какие вкусы любишь?</div>
+  <p class="section-sub">Можно выбрать несколько направлений или не выбирать ни одного — тогда покажем варианты из всех.</p>
+  <div class="chips" id="chipContainer"></div>
+
+  <div class="section-title" style="margin-bottom:2px;">Бренд табака <span class="optional-tag">необязательно</span></div>
+  <p class="section-sub">Можно выбрать один или несколько брендов, чтобы искать только среди них.</p>
+  <div class="chips brand-chips" id="brandContainer"></div>
+
+  <button class="cta" id="ctaBtn">Подобрать вкус →</button>
+
+  <div class="section-title" style="margin-bottom:2px;">Готовые миксы под твой вкус</div>
+  <p class="section-sub" id="recipeSub">Пока пусто — задай параметры выше.</p>
+  <div id="recipeResults">
+    <div class="empty">Собранные под твой запрос миксы из 2-3 табаков появятся здесь.</div>
+  </div>
+  <button class="reshuffle-btn" id="reshuffleBtn" style="display:none;">🔀 Показать другие варианты</button>
+  <p class="source-note" style="margin-top:-4px;">В базе — 108 миксов (18 придуманы вручную + 90 собраны алгоритмически из 49 реальных вкусов по тем же правилам миксологии: база ~50-90% + добавка/акцент). Это не рецепты с чужих сайтов и не проверенные тысячами покуров хиты — идеи для эксперимента. Крепость смещена в сторону 5-9/10: выше по этой базе не поднимается ни один реальный вкус в каталоге, так что «10/10» здесь не встретится, пока в продаже не появится что-то крепче.</p>
+
+  <div class="section-title" style="margin-bottom:2px; margin-top:24px;">Подходящие вкусы соло</div>
+  <p class="section-sub" id="resultsSub">Пока пусто — задай параметры выше.</p>
+  <div id="results">
+    <div class="empty">Выбери крепость и, если хочешь, вкусовые направления — здесь появится список подходящих табаков.</div>
+  </div>
+
+  <p class="footnote">Крепость и вкусовые профили — по общим оценкам кальянного комьюнити и производителей, а не лабораторные измерения. Список брендов актуализирован: марки, которые сейчас почти не встречаются на прилавках в РФ (например, Tangiers и Fumari — с 2022 года в дефиците и под риском подделок), заменены на реально доступные сегодня аналоги. Ощущения от одного и того же табака зависят от чаши, укладки и калильных.</p>
+  </div>
+
+  <div class="view" id="view-favorites">
+    <div class="section-title" style="margin-top:2px;">Избранные миксы</div>
+    <p class="section-sub" id="favSub">Пока пусто.</p>
+    <div id="favResults">
+      <div class="empty">Нажми на ♡ на понравившемся миксе во вкладке «Подбор вкуса» — он появится здесь.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Telegram Mini App integration (safe no-op outside Telegram) ----------
+try{
+  if (window.Telegram && window.Telegram.WebApp){
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    if (tg.setHeaderColor) { try{ tg.setHeaderColor('#15120E'); }catch(e){} }
+  }
+}catch(e){}
+
+// ---------- Data ----------
+const CATEGORIES = [
+  { key:'fruity',  label:'Фруктовый',  icon:'🍑' },
+  { key:'citrus',  label:'Цитрусовый', icon:'🍋' },
+  { key:'berry',   label:'Ягодный',    icon:'🍓' },
+  { key:'mint',    label:'Холод/Свежесть',   icon:'❄️' },
+  { key:'dessert', label:'Десертный',  icon:'🍮' },
+  { key:'spice',   label:'Пряный',     icon:'🌶️' },
+  { key:'floral',  label:'Цветочный',  icon:'🌸' },
+  { key:'drink',   label:'Напитки',    icon:'🥤' },
+  { key:'exotic',  label:'Экзотика',   icon:'🥭' },
+  { key:'classic', label:'Классика',   icon:'🚬' },
+];
+
+const FLAVORS = [
+  { name:'Hard — Мята', brand:'Хулиган', strength:9, tags:['mint','classic'], note:'Тяжёлая крепкая основа с ментоловой прохладой — ощутимый удар и долгое послевкусие.' },
+  { name:'Ванильный крем', brand:'Musthave', strength:6, tags:['dessert'], note:'Сливочно-ванильный десерт средней крепости — плотный и уютный вкус.' },
+  { name:'Core Grapefruit', brand:'Darkside', strength:6, tags:['citrus'], note:'Терпкий грейпфрут на среднекрепкой основе — освежает, но не бьёт в голову.' },
+  { name:'Base Sicily Mint', brand:'Darkside', strength:5, tags:['mint','citrus'], note:'Лёгкая база с цитрусово-мятным сочетанием — для долгих посиделок.' },
+  { name:'Medium Lemon Secret', brand:'Darkside', strength:8, tags:['citrus','spice'], note:'Плотный лимон с пряной ноткой, крепость чувствуется уже с первых затяжек.' },
+  { name:'Ice Bergamot', brand:'Musthave', strength:6, tags:['citrus','mint'], note:'Бергамот с холодком — свежий и не приторный вкус.' },
+  { name:'Raspberry Jam', brand:'Musthave', strength:5, tags:['berry','dessert'], note:'Малиновое варенье, мягкая крепость, десертный профиль.' },
+  { name:'Клубника со сливками', brand:'Sarma', strength:4, tags:['berry','dessert'], note:'Классическое сливочно-ягодное сочетание, лёгкая крепость.' },
+  { name:'Дыня', brand:'Sarma', strength:3, tags:['fruity','exotic'], note:'Сочная дыня, один из самых лёгких вариантов в подборке.' },
+  { name:'Medium Peach Ice', brand:'Chabacco', strength:5, tags:['fruity','mint'], note:'Персик с холодком, сбалансированная крепость.' },
+  { name:'Strong Cola', brand:'Chabacco', strength:8, tags:['drink'], note:'Плотная кола с ощутимым табачным ударом.' },
+  { name:'Земля — Личи', brand:'Element', strength:6, tags:['exotic','fruity'], note:'Экзотический личи на средней по крепости линейке «Земля».' },
+  { name:'Огонь — Дыня-мята', brand:'Element', strength:7, tags:['mint','fruity'], note:'Дыня с мятой на крепкой линейке «Огонь».' },
+  { name:'Вода — Мохито', brand:'Element', strength:3, tags:['drink','mint'], note:'Лёгкий освежающий мохито, минимальная крепость.' },
+  { name:'Воздух — Черника-мята', brand:'Element', strength:4, tags:['berry','mint'], note:'Черника с прохладой на самой лёгкой линейке.' },
+  { name:'Love 66', brand:'Adalya', strength:5, tags:['fruity','dessert'], note:'Фруктово-десертный микс, средняя крепость.' },
+  { name:'Lady Killer', brand:'Adalya', strength:6, tags:['berry','citrus'], note:'Ягодно-цитрусовое сочетание с плотной подачей вкуса.' },
+  { name:'Vanilla', brand:'Sebero', strength:5, tags:['dessert','fruity'], note:'Мягкий ванильный десерт, часто используется как смягчающая добавка в миксах.' },
+  { name:'Haribon', brand:'Black Burn', strength:4, tags:['dessert'], note:'Сладкие мармеладные мишки, один из самых лёгких десертов на рынке.' },
+  { name:'Skywalker', brand:'WTO', strength:6, tags:['exotic','dessert'], note:'Ягодно-цитрусовый десерт с необычной кислинкой.' },
+  { name:'Multibonbon', brand:'Overdose', strength:9, tags:['dessert','fruity'], note:'Мультифруктовые конфеты на очень крепкой забивной основе.' },
+  { name:'Hard Line Fresh Grape', brand:'Spectrum', strength:9, tags:['fruity','mint'], note:'Свежий виноград с холодком на жёсткой линейке — крепость ощутима сразу.' },
+  { name:'Medium Line Cherry Cola', brand:'Spectrum', strength:6, tags:['drink','berry'], note:'Вишнёвая кола средней крепости.' },
+  { name:'Sweet Peach', brand:'Black Burn', strength:7, tags:['fruity','dessert'], note:'Сладкий персик с плотной табачной подачей.' },
+  { name:'Rakuto', brand:'Black Burn', strength:8, tags:['citrus','exotic'], note:'Японский цитрус якто на крепкой основе.' },
+  { name:'Личи-малина', brand:'Daily Hookah', strength:5, tags:['exotic','berry'], note:'Личи с малиной, сбалансированная крепость.' },
+  { name:'Гуава-маракуйя', brand:'Bonche', strength:5, tags:['exotic','fruity'], note:'Тропический дуэт гуавы и маракуйи, средняя крепость.' },
+  { name:'Rose Lokum', brand:'Adalya', strength:4, tags:['floral','dessert'], note:'Розовый рахат-лукум — цветочно-десертный, мягкий по крепости.' },
+  { name:'Лаванда, ваниль', brand:'Jent', strength:4, tags:['floral'], note:'Деликатный лавандово-ванильный вкус — цветочный профиль без резкости.' },
+  { name:'Корица', brand:'Musthave', strength:3, tags:['spice'], note:'Тёплая корица, часто используется как небольшой пряный акцент в миксах.' },
+  { name:'Strawberry', brand:'Sebero', strength:4, tags:['berry','dessert'], note:'Клубника с лёгкой сливочной нотой, мягкая крепость.' },
+  { name:'Cherry Juice', brand:'Duft', strength:5, tags:['berry','fruity'], note:'Насыщенный вишнёвый сок, узнаваемый и некрепкий.' },
+  { name:'Aperol Spritz', brand:'Duft', strength:6, tags:['drink','citrus'], note:'Апельсиново-травяной коктейльный вкус со среднекрепкой подачей.' },
+  { name:'Brisky Whiskey', brand:'Jent', strength:6, tags:['drink','classic'], note:'Дымный виски с плотным табачным характером.' },
+  { name:'Hurtleberry', brand:'Trofimoff\'S', strength:6, tags:['berry'], note:'Голубика с лесной кислинкой, средняя крепость.' },
+  { name:'The Rose', brand:'Trofimoff\'S', strength:6, tags:['floral'], note:'Насыщенный розовый вкус с плотной подачей аромата.' },
+  { name:'Кучерявый персик', brand:'Северный', strength:5, tags:['fruity'], note:'Сладкий персик, узнаваемый российский вкус средней крепости.' },
+  { name:'1915', brand:'Satyr', strength:8, tags:['classic'], note:'Крепкая табачная классика с характерной терпкостью.' },
+  { name:'Ice Cherry', brand:'Satyr', strength:6, tags:['berry','mint'], note:'Вишня с холодком, сбалансированная крепость.' },
+  { name:'Kiwi Stoner', brand:'Black Burn', strength:6, tags:['fruity','mint'], note:'Киви с прохладой — один из самых узнаваемых миксовых компонентов сейчас.' },
+  { name:'Grape Soda', brand:'Spectrum', strength:6, tags:['drink','fruity'], note:'Виноградная газировка, сладкая и в меру крепкая.' },
+  { name:'Blueberry 2022', brand:'Overdose', strength:7, tags:['berry'], note:'Плотная черника на крепкой забивной основе.' },
+  { name:'Dark Chocolate', brand:'Bonche', strength:6, tags:['dessert'], note:'Тёмный шоколад, плотный десертный вкус средней крепости.' },
+  { name:'Lavender', brand:'Bonche', strength:4, tags:['floral'], note:'Чистая лаванда, лёгкий цветочный профиль.' },
+  { name:'360 Помело-грейпфрут', brand:'Sarma', strength:5, tags:['citrus'], note:'Терпкий помело с грейпфрутом на облегчённой линейке 360.' },
+  { name:'Чупа чупс', brand:'Nаш', strength:5, tags:['dessert','fruity'], note:'Леденцовая сладость, узнаваемый десертный вкус средней крепости.' },
+  { name:'Rose Grapefruit', brand:'Deus', strength:6, tags:['floral','citrus'], note:'Розово-грейпфрутовое сочетание — цветочная нота на терпкой цитрусовой основе.' },
+  { name:'Blackberry Wine', brand:'Deus', strength:6, tags:['berry','drink'], note:'Ежевичное вино — плотный ягодный вкус с винным характером.' },
+  { name:'Guinness', brand:'Deus', strength:6, tags:['drink'], note:'Тёмное пиво — плотный солодовый профиль средней крепости.' },
+  { name:'Love is', brand:'Deus', strength:5, tags:['dessert'], note:'Сладкий десертный вкус с мягкой подачей.' },
+  { name:'Клубничный мильфей', brand:'Starline', strength:4, tags:['berry','dessert'], note:'Клубника с кремовой выпечкой — лёгкий десертный вкус.' },
+  { name:'Ежевика', brand:'Starline', strength:4, tags:['berry'], note:'Чистая ежевика, узнаваемый ягодный вкус без резкости.' },
+  { name:'Виноградное желе', brand:'Starline', strength:4, tags:['fruity','dessert'], note:'Виноградное желе — сладкий фруктовый вкус мягкой крепости.' },
+  // ---------- New flavors from official/retailer research (Darkside official catalog + Sebero multi-source) ----------
+  { name:'Bananapapa', brand:'Darkside', strength:6, tags:['fruity'], note:'Насыщенный банан — один из самых узнаваемых вкусов линейки Core, хорошо держит форму в миксах со сладким.' },
+  { name:'Cosmos', brand:'Darkside', strength:6, tags:['drink'], note:'Коктейль «Космополитен» — клюква с лёгкой кислинкой и цитрусом.' },
+  { name:'Code Cherry', brand:'Darkside', strength:6, tags:['berry'], note:'Сочная спелая вишня — не приторная, с терпким послевкусием косточки.' },
+  { name:'Blackcurrant', brand:'Darkside', strength:6, tags:['berry'], note:'Чёрная смородина — один из сильных ягодных вкусов линейки, хорошая основа для ягодных миксов.' },
+  { name:'Blueberry Blast', brand:'Darkside', strength:6, tags:['berry'], note:'Насыщенная черника, плотный ягодный вкус средней крепости.' },
+  { name:'Bounty Hunter', brand:'Darkside', strength:6, tags:['exotic'], note:'Кокос с лёгким ментоловым послевкусием — необычное сочетание для миксов.' },
+  { name:'C.R.E.A.M. S.O.D.A.', brand:'Darkside', strength:6, tags:['dessert','drink'], note:'Ванильная крем-сода — десертно-напиточный вкус, сладкий, но не приторный.' },
+  { name:'Cherry Rocks', brand:'Darkside', strength:5, tags:['berry'], note:'Вишнёвые леденцы — более лёгкий и кондитерский вариант вишни, чем Code Cherry.' },
+  { name:'Bloody Orange', brand:'Darkside', strength:6, tags:['citrus'], note:'Красный апельсин — насыщенный цитрусовый вкус с лёгкой сладостью.' },
+  { name:'Breaking Red', brand:'Darkside', strength:6, tags:['fruity'], note:'Гранат — терпкий и в меру кислый фруктовый вкус.' },
+  { name:'Mango Yogurt', brand:'Sebero', strength:7, tags:['exotic','dessert'], note:'Манго-йогурт из линейки Sebero Black — сливочный, тропический, один из топовых вкусов бренда.' },
+  { name:'Garnet', brand:'Sebero', strength:7, tags:['fruity'], note:'Гранат из линейки Sebero Black — терпкий, в меру крепкий фруктовый вкус.' },
+  { name:'Herbal-Currant', brand:'Sebero', strength:7, tags:['berry','spice'], note:'Ревень с чёрной смородиной — необычное кисло-сладкое травянистое сочетание из линейки Black.' },
+  { name:'Root Beer', brand:'Sebero', strength:7, tags:['drink'], note:'Рутбир с пряными нотками и ванилью — нишевый, но узнаваемый вкус линейки Black.' },
+  { name:'Lemon Candy', brand:'Sebero', strength:4, tags:['citrus','dessert'], note:'Кисло-сладкие лимонные леденцы — лёгкий вариант из классической линейки.' },
+  { name:'Bubble Gum', brand:'Sebero', strength:4, tags:['dessert'], note:'Сладкая фруктовая жвачка — ностальгический десертный вкус мягкой крепости.' },
+  { name:'Thai', brand:'Sebero', strength:5, tags:['drink','exotic'], note:'Кисло-сладкий алкогольный коктейль с тропическими фруктами.' },
+];
+
+// ---------- Strength word ----------
+function strengthWord(v){
+  if (v<=2) return 'Лёгкий';
+  if (v<=4) return 'Легко-средний';
+  if (v<=6) return 'Средний';
+  if (v<=8) return 'Крепкий';
+  return 'Забивной';
+}
+
+// ---------- Smoke plume (signature visual) ----------
+const svg = document.getElementById('plumeSvg');
+function buildPlume(strength){
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  const count = 3 + Math.round(strength/2); // more wisps = more strength
+  const baseOpacity = 0.18 + strength*0.045;
+  for (let i=0;i<count;i++){
+    const path = document.createElementNS(ns,'path');
+    const xOff = 100 + (i - count/2)*6;
+    const sway = 14 + strength*2.2;
+    const height = 60 + strength*6 - i*4;
+    const d = `M ${xOff} 128
+               C ${xOff - sway} ${128 - height*0.35}, ${xOff + sway} ${128 - height*0.6}, ${xOff - sway*0.6} ${128 - height}`;
+    path.setAttribute('d', d);
+    path.setAttribute('class','wisp');
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', i % 2 === 0 ? '#E6802F' : '#EDE6D9');
+    path.setAttribute('stroke-width', (1.4 + strength*0.12).toFixed(2));
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('opacity', (baseOpacity - i*0.02).toFixed(2));
+    const dur = (4.5 - strength*0.18 + i*0.3).toFixed(2);
+    const anim = document.createElementNS(ns,'animateTransform');
+    anim.setAttribute('attributeName','transform');
+    anim.setAttribute('type','translate');
+    anim.setAttribute('values', `0 0; ${i%2===0?4:-4} -6; 0 0`);
+    anim.setAttribute('dur', dur+'s');
+    anim.setAttribute('repeatCount','indefinite');
+    path.appendChild(anim);
+    svg.appendChild(path);
+  }
+  // ember base glow
+  const glow = document.createElementNS(ns,'circle');
+  glow.setAttribute('cx','100'); glow.setAttribute('cy','126'); glow.setAttribute('r', 4+strength*0.6);
+  glow.setAttribute('fill','#E6802F');
+  glow.setAttribute('opacity', 0.5 + strength*0.04);
+  svg.appendChild(glow);
+}
+
+const slider = document.getElementById('strengthSlider');
+const numOut = document.getElementById('numOut');
+const wordOut = document.getElementById('wordOut');
+
+function updateGauge(){
+  const v = parseInt(slider.value,10);
+  numOut.textContent = v;
+  wordOut.textContent = strengthWord(v);
+  buildPlume(v);
+}
+slider.addEventListener('input', updateGauge);
+updateGauge();
+
+// ---------- Chips ----------
+const chipContainer = document.getElementById('chipContainer');
+const selected = new Set();
+CATEGORIES.forEach(cat=>{
+  const el = document.createElement('div');
+  el.className = 'chip';
+  el.innerHTML = `<span>${cat.icon}</span><span>${cat.label}</span>`;
+  el.addEventListener('click', ()=>{
+    if (selected.has(cat.key)){ selected.delete(cat.key); el.classList.remove('active'); }
+    else { selected.add(cat.key); el.classList.add('active'); }
+  });
+  el.dataset.key = cat.key;
+  chipContainer.appendChild(el);
+});
+
+// ---------- Brand filter ----------
+// Brand list is derived from FLAVORS so it always matches what's actually in the catalog.
+const BRAND_LIST = [...new Set(FLAVORS.map(f=>f.brand))].sort((a,b)=>a.localeCompare(b, 'ru'));
+// Sorted by length (desc) so multi-word brands (e.g. "Black Burn") are matched
+// before any shorter, coincidentally-overlapping prefix.
+const BRAND_LIST_BY_LENGTH = [...BRAND_LIST].sort((a,b)=> b.length - a.length);
+
+function detectBrandsInRecipe(recipe){
+  const found = new Set();
+  recipe.forEach(item=>{
+    const brand = BRAND_LIST_BY_LENGTH.find(b => item.t.startsWith(b + ' ') || item.t === b);
+    if (brand) found.add(brand);
+  });
+  return [...found];
+}
+
+const brandContainer = document.getElementById('brandContainer');
+const selectedBrands = new Set();
+BRAND_LIST.forEach(brand=>{
+  const el = document.createElement('div');
+  el.className = 'chip';
+  el.textContent = brand;
+  el.addEventListener('click', ()=>{
+    if (selectedBrands.has(brand)){ selectedBrands.delete(brand); el.classList.remove('active'); }
+    else { selectedBrands.add(brand); el.classList.add('active'); }
+  });
+  el.dataset.brand = brand;
+  brandContainer.appendChild(el);
+});
+
+// ---------- Matching ----------
+const resultsEl = document.getElementById('results');
+const resultsSub = document.getElementById('resultsSub');
+
+function findMatches(){
+  const target = parseInt(slider.value,10);
+  const cats = selected;
+
+  let pool = FLAVORS.map(f=>{
+    const tagHits = cats.size === 0 ? 0 : f.tags.filter(t=>cats.has(t)).length;
+    const diff = Math.abs(f.strength - target);
+    return { ...f, tagHits, diff };
+  });
+
+  if (cats.size > 0){
+    pool = pool.filter(f=>f.tagHits > 0);
+  }
+  if (selectedBrands.size > 0){
+    pool = pool.filter(f=>selectedBrands.has(f.brand));
+  }
+
+  pool.sort((a,b)=>{
+    if (cats.size>0 && b.tagHits !== a.tagHits) return b.tagHits - a.tagHits;
+    return a.diff - b.diff;
+  });
+
+  return pool.slice(0, 8);
+}
+
+// ---------- Curated combo recipes (invented by Claude, based on general mixology principles found online) ----------
+// Ratio convention: base ~50-60%, secondary ~25-35%, accent ~10-15% (mint/ice/spice topping)
+const MIX_RECIPES = [
+  { name:'Сладкий бриз', tags:['citrus','dessert','mint'], recipe:[{t:'Sebero Lemon Candy', p:90, s:4}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Сладкий бриз — это лёгкий ветер с цитрусовой нотой. Lemon Candy составляет основу (~90%), Ice Bergamot добавляет лёгкий холодок (~10%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Спелый фреш', tags:['berry','fruity','mint'], recipe:[{t:'Duft Cherry Juice', p:90, s:5}, {t:'Black Burn Kiwi Stoner', p:10, s:6}], note:'Спелый фреш — это свежевыжатый сок в самом начале дня. Cherry Juice составляет основу (~90%), Kiwi Stoner вносит фруктовую сочность (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Спелый крем', tags:['dessert','fruity','mint'], recipe:[{t:'Adalya Love 66', p:90, s:5}, {t:'Element Огонь — Дыня-мята', p:10, s:7}], note:'Спелый крем — это нежный крем, который тает на языке. Love 66 составляет основу (~90%), Огонь — Дыня-мята добавляет лёгкий холодок (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Садовый фреш', tags:['dessert','fruity','mint'], recipe:[{t:'Adalya Love 66', p:90, s:5}, {t:'Spectrum Hard Line Fresh Grape', p:10, s:9}], note:'Садовый фреш — это свежевыжатый сок в самом начале дня. Love 66 составляет основу (~90%), Hard Line Fresh Grape подчёркивает фруктовую сочность (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сочный полдень', tags:['berry','drink','mint'], recipe:[{t:'Deus Blackberry Wine', p:90, s:6}, {t:'Element Вода — Мохито', p:10, s:3}], note:'Сочный полдень — это ленивый полдень на летней веранде. Blackberry Wine составляет основу (~90%), Вода — Мохито усиливает напиточный характер (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный бриз', tags:['berry','citrus','mint'], recipe:[{t:'Adalya Lady Killer', p:90, s:6}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Сочный бриз — это лёгкий ветер с цитрусовой нотой. Lady Killer составляет основу (~90%), Base Sicily Mint подчёркивает лёгкий холодок (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный бар', tags:['berry','drink','mint'], recipe:[{t:'Spectrum Medium Line Cherry Cola', p:90, s:6}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Сочный бар — это атмосфера бара поздним вечером. Medium Line Cherry Cola составляет основу (~90%), Воздух — Черника-мята подчёркивает лёгкий холодок (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный рассвет', tags:['dessert','fruity','mint'], recipe:[{t:'Black Burn Sweet Peach', p:90, s:7}, {t:'Spectrum Hard Line Fresh Grape', p:10, s:9}], note:'Сочный рассвет — это первые тёплые лучи, которые будят вкус. Sweet Peach составляет основу (~90%), Hard Line Fresh Grape усиливает фруктовую сочность (~10%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Тёплый ягодник', tags:['berry','mint','spice'], recipe:[{t:'Sebero Herbal-Currant', p:90, s:7}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Тёплый ягодник — это сбор ягод прямо с куста. Herbal-Currant составляет основу (~90%), Воздух — Черника-мята добавляет лёгкий холодок (~10%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сладкий бар', tags:['dessert','drink','fruity'], recipe:[{t:'Overdose Multibonbon', p:70, s:9}, {t:'Darkside C.R.E.A.M. S.O.D.A.', p:30, s:6}], note:'Сладкий бар — это атмосфера бара поздним вечером. Multibonbon составляет основу (~70%), C.R.E.A.M. S.O.D.A. вносит напиточный характер (~30%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Цитрусовый заряд', tags:['citrus','exotic','spice'], recipe:[{t:'Darkside Medium Lemon Secret', p:60, s:8}, {t:'Black Burn Rakuto', p:40, s:8}], note:'Цитрусовый заряд — это бодрящий цитрусовый импульс с утра. Medium Lemon Secret составляет основу (~60%), Rakuto подчёркивает экзотическую нотку (~40%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Уютный пирог', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:90, s:9}, {t:'Spectrum Hard Line Fresh Grape', p:10, s:9}], note:'Уютный пирог — это свежая выпечка, только из духовки. Multibonbon составляет основу (~90%), Hard Line Fresh Grape добавляет фруктовую сочность (~10%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Кремовый всплеск', tags:['citrus','dessert','floral','mint'], recipe:[{t:'Adalya Rose Lokum', p:65, s:4}, {t:'Sebero Lemon Candy', p:25, s:4}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Кремовый всплеск — это резкий, яркий всплеск на вдохе. Rose Lokum составляет основу (~65%), Lemon Candy усиливает десертную сладость (~25%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кислый цитрус', tags:['citrus','dessert','fruity','mint'], recipe:[{t:'Sebero Lemon Candy', p:60, s:4}, {t:'Starline Виноградное желе', p:30, s:4}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Кислый цитрус — это терпкий цитрусовый акцент на языке. Lemon Candy составляет основу (~60%), Виноградное желе подчёркивает фруктовую сочность (~30%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Уютный пломбир', tags:['citrus','dessert','fruity','mint'], recipe:[{t:'Sebero Lemon Candy', p:58, s:4}, {t:'Nаш Чупа чупс', p:32, s:5}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Уютный пломбир — это тающий пломбир в жаркий полдень. Lemon Candy составляет основу (~58%), Чупа чупс подчёркивает десертную сладость (~32%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сочный десерт', tags:['berry','dessert','exotic','fruity'], recipe:[{t:'Sarma Дыня', p:55, s:3}, {t:'Duft Cherry Juice', p:30, s:5}, {t:'Musthave Raspberry Jam', p:15, s:5}], note:'Сочный десерт — это десертный стол в конце ужина. Дыня составляет основу (~55%), Cherry Juice подчёркивает фруктовую сочность (~30%), Raspberry Jam закрывает микс лёгким акцентом (~15%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Спелый ягодник', tags:['berry','dessert','exotic','mint'], recipe:[{t:'Sebero Strawberry', p:58, s:4}, {t:'Daily Hookah Личи-малина', p:32, s:5}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Спелый ягодник — это сбор ягод прямо с куста. Strawberry составляет основу (~58%), Личи-малина усиливает экзотическую нотку (~32%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Дальний пирог', tags:['dessert','exotic','fruity','mint'], recipe:[{t:'Sarma Дыня', p:60, s:3}, {t:'Sebero Mango Yogurt', p:30, s:7}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Дальний пирог — это свежая выпечка, только из духовки. Дыня составляет основу (~60%), Mango Yogurt усиливает экзотическую нотку (~30%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кремовая россыпь', tags:['berry','dessert','floral','mint'], recipe:[{t:'Sebero Strawberry', p:60, s:4}, {t:'Adalya Rose Lokum', p:30, s:4}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Кремовая россыпь — это россыпь спелых ягод в горсти. Strawberry составляет основу (~60%), Rose Lokum подчёркивает цветочный шлейф (~30%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Бодрящий цитрус', tags:['berry','citrus','dessert','mint'], recipe:[{t:'Sebero Lemon Candy', p:65, s:4}, {t:'Musthave Raspberry Jam', p:25, s:5}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Бодрящий цитрус — это терпкий цитрусовый акцент на языке. Lemon Candy составляет основу (~65%), Raspberry Jam усиливает десертную сладость (~25%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Табачный дым', tags:['classic','drink','exotic','fruity'], recipe:[{t:'Spectrum Grape Soda', p:55, s:6}, {t:'Jent Brisky Whiskey', p:25, s:6}, {t:'Sarma Дыня', p:20, s:3}], note:'Табачный дым — это густой, тягучий дым, который долго держится. Grape Soda составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~25%), Дыня закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Экзотичный полдень', tags:['drink','exotic','fruity','mint'], recipe:[{t:'Bonche Гуава-маракуйя', p:55, s:5}, {t:'Spectrum Grape Soda', p:35, s:6}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Экзотичный полдень — это ленивый полдень на летней веранде. Гуава-маракуйя составляет основу (~55%), Grape Soda добавляет фруктовую сочность (~35%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Игристые джунгли', tags:['drink','exotic','fruity','mint'], recipe:[{t:'Spectrum Grape Soda', p:65, s:6}, {t:'Sarma Дыня', p:25, s:3}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Игристые джунгли — это густые джунгли с незнакомыми ароматами. Grape Soda составляет основу (~65%), Дыня добавляет фруктовую сочность (~25%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Барный рай', tags:['drink','exotic','fruity'], recipe:[{t:'Spectrum Grape Soda', p:55, s:6}, {t:'Sarma Дыня', p:30, s:3}, {t:'Chabacco Strong Cola', p:15, s:8}], note:'Барный рай — это кусочек тропического рая в чаше. Grape Soda составляет основу (~55%), Дыня подчёркивает фруктовую сочность (~30%), Strong Cola закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Игристый полдень', tags:['berry','drink','exotic','mint'], recipe:[{t:'Daily Hookah Личи-малина', p:55, s:5}, {t:'Deus Blackberry Wine', p:35, s:6}, {t:'Element Вода — Мохито', p:10, s:3}], note:'Игристый полдень — это ленивый полдень на летней веранде. Личи-малина составляет основу (~55%), Blackberry Wine вносит напиточный характер (~35%), Вода — Мохито закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Райские джунгли', tags:['drink','exotic','fruity','mint'], recipe:[{t:'Bonche Гуава-маракуйя', p:60, s:5}, {t:'Sebero Thai', p:30, s:5}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Райские джунгли — это густые джунгли с незнакомыми ароматами. Гуава-маракуйя составляет основу (~60%), Thai подчёркивает экзотическую нотку (~30%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Лесная россыпь', tags:['berry','drink','exotic','mint'], recipe:[{t:'Daily Hookah Личи-малина', p:58, s:5}, {t:'Spectrum Medium Line Cherry Cola', p:32, s:6}, {t:'Element Вода — Мохито', p:10, s:3}], note:'Лесная россыпь — это россыпь спелых ягод в горсти. Личи-малина составляет основу (~58%), Medium Line Cherry Cola подчёркивает напиточный характер (~32%), Вода — Мохито закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Барный полдень', tags:['drink','exotic','fruity'], recipe:[{t:'Deus Guinness', p:50, s:6}, {t:'Spectrum Grape Soda', p:30, s:6}, {t:'Sarma Дыня', p:20, s:3}], note:'Барный полдень — это ленивый полдень на летней веранде. Guinness составляет основу (~50%), Grape Soda подчёркивает фруктовую сочность (~30%), Дыня закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Бодрящий сад', tags:['citrus','floral'], recipe:[{t:'Jent Лаванда, ваниль', p:50, s:4}, {t:'Deus Rose Grapefruit', p:30, s:6}, {t:'Darkside Core Grapefruit', p:20, s:6}], note:'Бодрящий сад — это прогулка по фруктовому саду в жаркий день. Лаванда, ваниль составляет основу (~50%), Rose Grapefruit подчёркивает цветочный шлейф (~30%), Core Grapefruit закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кислый всплеск', tags:['citrus','floral'], recipe:[{t:'Deus Rose Grapefruit', p:50, s:6}, {t:'Bonche Lavender', p:35, s:4}, {t:'Darkside Core Grapefruit', p:15, s:6}], note:'Кислый всплеск — это резкий, яркий всплеск на вдохе. Rose Grapefruit составляет основу (~50%), Lavender усиливает цветочный шлейф (~35%), Core Grapefruit закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Бодрящий аромат', tags:['citrus','floral','mint'], recipe:[{t:'Deus Rose Grapefruit', p:65, s:6}, {t:'Jent Лаванда, ваниль', p:25, s:4}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Бодрящий аромат — это парфюмерный цветочный шлейф. Rose Grapefruit составляет основу (~65%), Лаванда, ваниль добавляет цветочный шлейф (~25%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Цитрусовый бриз', tags:['citrus','dessert','floral'], recipe:[{t:'Sebero Lemon Candy', p:60, s:4}, {t:'Deus Rose Grapefruit', p:25, s:6}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Цитрусовый бриз — это лёгкий ветер с цитрусовой нотой. Lemon Candy составляет основу (~60%), Rose Grapefruit подчёркивает цветочный шлейф (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Бодрящий всплеск', tags:['citrus','dessert','floral'], recipe:[{t:'Adalya Rose Lokum', p:60, s:4}, {t:'Deus Rose Grapefruit', p:25, s:6}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Бодрящий всплеск — это резкий, яркий всплеск на вдохе. Rose Lokum составляет основу (~60%), Rose Grapefruit усиливает цветочный шлейф (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Терпкий заряд', tags:['citrus','floral','mint'], recipe:[{t:'Bonche Lavender', p:65, s:4}, {t:'Deus Rose Grapefruit', p:25, s:6}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Терпкий заряд — это бодрящий цитрусовый импульс с утра. Lavender составляет основу (~65%), Rose Grapefruit подчёркивает цветочный шлейф (~25%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кремовый ягодник', tags:['berry','dessert','drink','exotic'], recipe:[{t:'Daily Hookah Личи-малина', p:50, s:5}, {t:'Deus Blackberry Wine', p:30, s:6}, {t:'Musthave Raspberry Jam', p:20, s:5}], note:'Кремовый ягодник — это сбор ягод прямо с куста. Личи-малина составляет основу (~50%), Blackberry Wine добавляет напиточный характер (~30%), Raspberry Jam закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Экзотичный десерт', tags:['dessert','exotic','fruity'], recipe:[{t:'Bonche Гуава-маракуйя', p:60, s:5}, {t:'WTO Skywalker', p:25, s:6}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Экзотичный десерт — это десертный стол в конце ужина. Гуава-маракуйя составляет основу (~60%), Skywalker добавляет экзотическую нотку (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Нежный букет', tags:['dessert','floral'], recipe:[{t:'Trofimoff\'S The Rose', p:50, s:6}, {t:'Jent Лаванда, ваниль', p:30, s:4}, {t:'Adalya Rose Lokum', p:20, s:4}], note:'Нежный букет — это собранный вручную цветочный букет. The Rose составляет основу (~50%), Лаванда, ваниль вносит цветочный шлейф (~30%), Rose Lokum закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сочный пломбир', tags:['berry','dessert','exotic'], recipe:[{t:'Starline Клубничный мильфей', p:50, s:4}, {t:'Daily Hookah Личи-малина', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сочный пломбир — это тающий пломбир в жаркий полдень. Клубничный мильфей составляет основу (~50%), Личи-малина вносит экзотическую нотку (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Уютный десерт', tags:['berry','dessert','exotic'], recipe:[{t:'Daily Hookah Личи-малина', p:60, s:5}, {t:'Trofimoff\'S Hurtleberry', p:25, s:6}, {t:'Musthave Raspberry Jam', p:15, s:5}], note:'Уютный десерт — это десертный стол в конце ужина. Личи-малина составляет основу (~60%), Hurtleberry вносит ягодную кислинку (~25%), Raspberry Jam закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Спелый джем', tags:['berry','dessert','exotic','fruity'], recipe:[{t:'Duft Cherry Juice', p:55, s:5}, {t:'Daily Hookah Личи-малина', p:25, s:5}, {t:'Musthave Raspberry Jam', p:20, s:5}], note:'Спелый джем — это густой ягодный джем на подаче. Cherry Juice составляет основу (~55%), Личи-малина подчёркивает экзотическую нотку (~25%), Raspberry Jam закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Дымный вечер', tags:['citrus','classic','drink','mint'], recipe:[{t:'Duft Aperol Spritz', p:55, s:6}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Дымный вечер — это поздний вечер в компании старых друзей. Aperol Spritz составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~35%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелый морс', tags:['berry','classic','drink','mint'], recipe:[{t:'Jent Brisky Whiskey', p:55, s:6}, {t:'Deus Blackberry Wine', p:35, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Спелый морс — это домашний ягодный морс со льдом. Brisky Whiskey составляет основу (~55%), Blackberry Wine подчёркивает напиточный характер (~35%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Игристый коктейль', tags:['classic','drink','exotic','mint'], recipe:[{t:'Jent Brisky Whiskey', p:58, s:6}, {t:'Sebero Thai', p:32, s:5}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Игристый коктейль — это вечер в баре за неспешным коктейлем. Brisky Whiskey составляет основу (~58%), Thai подчёркивает напиточный характер (~32%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Уютная легенда', tags:['classic','dessert','drink','mint'], recipe:[{t:'Darkside C.R.E.A.M. S.O.D.A.', p:65, s:6}, {t:'Jent Brisky Whiskey', p:25, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Уютная легенда — это вкус, который давно стал легендой кальянных. C.R.E.A.M. S.O.D.A. составляет основу (~65%), Brisky Whiskey подчёркивает напиточный характер (~25%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Вечерний шейк', tags:['classic','drink','mint'], recipe:[{t:'Jent Brisky Whiskey', p:58, s:6}, {t:'Deus Guinness', p:32, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Вечерний шейк — это взболтанный барменом шейк. Brisky Whiskey составляет основу (~58%), Guinness вносит напиточный характер (~32%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Дымная легенда', tags:['classic','drink','mint'], recipe:[{t:'Jent Brisky Whiskey', p:58, s:6}, {t:'Darkside Cosmos', p:32, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Дымная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~58%), Cosmos подчёркивает напиточный характер (~32%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Плотная легенда', tags:['berry','classic','drink','mint'], recipe:[{t:'Jent Brisky Whiskey', p:65, s:6}, {t:'Spectrum Medium Line Cherry Cola', p:25, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Плотная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~65%), Medium Line Cherry Cola усиливает напиточный характер (~25%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Барный вечер', tags:['classic','drink','fruity','mint'], recipe:[{t:'Jent Brisky Whiskey', p:58, s:6}, {t:'Spectrum Grape Soda', p:32, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Барный вечер — это поздний вечер в компании старых друзей. Brisky Whiskey составляет основу (~58%), Grape Soda усиливает напиточный характер (~32%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кислый бриз', tags:['citrus','drink','exotic','mint'], recipe:[{t:'Duft Aperol Spritz', p:65, s:6}, {t:'Black Burn Rakuto', p:25, s:8}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Кислый бриз — это лёгкий ветер с цитрусовой нотой. Aperol Spritz составляет основу (~65%), Rakuto добавляет экзотическую нотку (~25%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Домашний десерт', tags:['dessert','fruity'], recipe:[{t:'Black Burn Sweet Peach', p:50, s:7}, {t:'Nаш Чупа чупс', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Домашний десерт — это десертный стол в конце ужина. Sweet Peach составляет основу (~50%), Чупа чупс усиливает фруктовую сочность (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный ягодник', tags:['berry','dessert','exotic'], recipe:[{t:'WTO Skywalker', p:60, s:6}, {t:'Starline Клубничный мильфей', p:25, s:4}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сочный ягодник — это сбор ягод прямо с куста. Skywalker составляет основу (~60%), Клубничный мильфей усиливает десертную сладость (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелый пирог', tags:['dessert','fruity'], recipe:[{t:'Nаш Чупа чупс', p:60, s:5}, {t:'Overdose Multibonbon', p:25, s:9}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Спелый пирог — это свежая выпечка, только из духовки. Чупа чупс составляет основу (~60%), Multibonbon вносит фруктовую сочность (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ягодный крем', tags:['berry','dessert','fruity'], recipe:[{t:'Black Burn Sweet Peach', p:50, s:7}, {t:'Duft Cherry Juice', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Ягодный крем — это нежный крем, который тает на языке. Sweet Peach составляет основу (~50%), Cherry Juice подчёркивает фруктовую сочность (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кремовый десерт', tags:['dessert','fruity','mint'], recipe:[{t:'Black Burn Sweet Peach', p:65, s:7}, {t:'Северный Кучерявый персик', p:25, s:5}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Кремовый десерт — это десертный стол в конце ужина. Sweet Peach составляет основу (~65%), Кучерявый персик вносит фруктовую сочность (~25%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сладкая россыпь', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Starline Клубничный мильфей', p:58, s:4}, {t:'Overdose Multibonbon', p:32, s:9}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Сладкая россыпь — это россыпь спелых ягод в горсти. Клубничный мильфей составляет основу (~58%), Multibonbon подчёркивает десертную сладость (~32%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ягодный вихрь', tags:['berry','mint'], recipe:[{t:'Overdose Blueberry 2022', p:65, s:7}, {t:'Trofimoff\'S Hurtleberry', p:25, s:6}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Ягодный вихрь — это холодный вихрь, который сбивает с ног. Blueberry 2022 составляет основу (~65%), Hurtleberry вносит ягодную кислинку (~25%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Цитрусовый морс', tags:['berry','citrus','spice'], recipe:[{t:'Sebero Herbal-Currant', p:60, s:7}, {t:'Starline Ежевика', p:25, s:4}, {t:'Darkside Medium Lemon Secret', p:15, s:8}], note:'Цитрусовый морс — это домашний ягодный морс со льдом. Herbal-Currant составляет основу (~60%), Ежевика подчёркивает ягодную кислинку (~25%), Medium Lemon Secret закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Жгучий джем', tags:['berry','mint','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Trofimoff\'S Hurtleberry', p:35, s:6}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Жгучий джем — это густой ягодный джем на подаче. Herbal-Currant составляет основу (~55%), Hurtleberry усиливает ягодную кислинку (~35%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кремовый пирог', tags:['berry','dessert','spice'], recipe:[{t:'Sebero Herbal-Currant', p:60, s:7}, {t:'Starline Клубничный мильфей', p:25, s:4}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Кремовый пирог — это свежая выпечка, только из духовки. Herbal-Currant составляет основу (~60%), Клубничный мильфей добавляет десертную сладость (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Терпкая россыпь', tags:['berry','mint','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Starline Ежевика', p:35, s:4}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Терпкая россыпь — это россыпь спелых ягод в горсти. Herbal-Currant составляет основу (~55%), Ежевика подчёркивает ягодную кислинку (~35%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Тропический остров', tags:['dessert','exotic','fruity'], recipe:[{t:'Nаш Чупа чупс', p:50, s:5}, {t:'WTO Skywalker', p:35, s:6}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Тропический остров — это уединённый остров вдали от всех. Чупа чупс составляет основу (~50%), Skywalker усиливает экзотическую нотку (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Домашняя россыпь', tags:['berry','dessert','mint','spice'], recipe:[{t:'Sebero Herbal-Currant', p:58, s:7}, {t:'Starline Клубничный мильфей', p:32, s:4}, {t:'Element Воздух — Черника-мята', p:10, s:4}], note:'Домашняя россыпь — это россыпь спелых ягод в горсти. Herbal-Currant составляет основу (~58%), Клубничный мильфей добавляет десертную сладость (~32%), Воздух — Черника-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Лесной всплеск', tags:['berry','citrus','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Trofimoff\'S Hurtleberry', p:30, s:6}, {t:'Darkside Medium Lemon Secret', p:15, s:8}], note:'Лесной всплеск — это резкий, яркий всплеск на вдохе. Herbal-Currant составляет основу (~55%), Hurtleberry подчёркивает ягодную кислинку (~30%), Medium Lemon Secret закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Тропический пирог', tags:['dessert','exotic','fruity','mint'], recipe:[{t:'WTO Skywalker', p:60, s:6}, {t:'Overdose Multibonbon', p:30, s:9}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Тропический пирог — это свежая выпечка, только из духовки. Skywalker составляет основу (~60%), Multibonbon вносит фруктовую сочность (~30%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный заряд', tags:['berry','citrus','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Darkside Blueberry Blast', p:25, s:6}, {t:'Darkside Medium Lemon Secret', p:20, s:8}], note:'Сочный заряд — это бодрящий цитрусовый импульс с утра. Herbal-Currant составляет основу (~55%), Blueberry Blast усиливает ягодную кислинку (~25%), Medium Lemon Secret закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Плотный табак', tags:['classic','drink'], recipe:[{t:'Jent Brisky Whiskey', p:55, s:6}, {t:'Satyr 1915', p:25, s:8}, {t:'Chabacco Strong Cola', p:20, s:8}], note:'Плотный табак — это плотный табачный дым старой школы. Brisky Whiskey составляет основу (~55%), 1915 усиливает табачную плотность (~25%), Strong Cola закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Пряный цитрус', tags:['citrus','mint','spice'], recipe:[{t:'Darkside Bloody Orange', p:58, s:6}, {t:'Darkside Medium Lemon Secret', p:32, s:8}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Пряный цитрус — это терпкий цитрусовый акцент на языке. Bloody Orange составляет основу (~58%), Medium Lemon Secret вносит пряную нотку (~32%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ароматное цветение', tags:['citrus','floral','spice'], recipe:[{t:'Darkside Medium Lemon Secret', p:50, s:8}, {t:'Deus Rose Grapefruit', p:30, s:6}, {t:'Darkside Core Grapefruit', p:20, s:6}], note:'Ароматное цветение — это весеннее цветение сада. Medium Lemon Secret составляет основу (~50%), Rose Grapefruit подчёркивает цветочный шлейф (~30%), Core Grapefruit закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сладкий остров', tags:['dessert','exotic','fruity'], recipe:[{t:'WTO Skywalker', p:55, s:6}, {t:'Overdose Multibonbon', p:30, s:9}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сладкий остров — это уединённый остров вдали от всех. Skywalker составляет основу (~55%), Multibonbon усиливает фруктовую сочность (~30%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Цитрусовый шейк', tags:['citrus','drink','spice'], recipe:[{t:'Duft Aperol Spritz', p:55, s:6}, {t:'Darkside Medium Lemon Secret', p:30, s:8}, {t:'Darkside Core Grapefruit', p:15, s:6}], note:'Цитрусовый шейк — это взболтанный барменом шейк. Aperol Spritz составляет основу (~55%), Medium Lemon Secret добавляет пряную нотку (~30%), Core Grapefruit закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелый пломбир', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:55, s:9}, {t:'Nаш Чупа чупс', p:35, s:5}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Спелый пломбир — это тающий пломбир в жаркий полдень. Multibonbon составляет основу (~55%), Чупа чупс вносит фруктовую сочность (~35%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Классический коктейль', tags:['classic','drink','mint'], recipe:[{t:'Satyr 1915', p:55, s:8}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Классический коктейль — это вечер в баре за неспешным коктейлем. 1915 составляет основу (~55%), Brisky Whiskey вносит напиточный характер (~35%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Сочный крем', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:55, s:9}, {t:'Северный Кучерявый персик', p:35, s:5}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Сочный крем — это нежный крем, который тает на языке. Multibonbon составляет основу (~55%), Кучерявый персик вносит фруктовую сочность (~35%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Домашний пломбир', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:50, s:9}, {t:'Северный Кучерявый персик', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Домашний пломбир — это тающий пломбир в жаркий полдень. Multibonbon составляет основу (~50%), Кучерявый персик подчёркивает фруктовую сочность (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Жгучая пряность', tags:['citrus','mint','spice'], recipe:[{t:'Darkside Medium Lemon Secret', p:55, s:8}, {t:'Sarma 360 Помело-грейпфрут', p:35, s:5}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Жгучая пряность — это восточная пряность, добавленная в конце. Medium Lemon Secret составляет основу (~55%), 360 Помело-грейпфрут подчёркивает цитрусовую терпкость (~35%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ягодный джем', tags:['berry','citrus','spice'], recipe:[{t:'Darkside Medium Lemon Secret', p:50, s:8}, {t:'Darkside Core Grapefruit', p:30, s:6}, {t:'Adalya Lady Killer', p:20, s:6}], note:'Ягодный джем — это густой ягодный джем на подаче. Medium Lemon Secret составляет основу (~50%), Core Grapefruit добавляет цитрусовую терпкость (~30%), Lady Killer закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ягодный всплеск', tags:['berry','citrus','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Darkside Blackcurrant', p:25, s:6}, {t:'Darkside Medium Lemon Secret', p:20, s:8}], note:'Ягодный всплеск — это резкий, яркий всплеск на вдохе. Herbal-Currant составляет основу (~55%), Blackcurrant вносит ягодную кислинку (~25%), Medium Lemon Secret закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Лесной цитрус', tags:['berry','citrus','mint','spice'], recipe:[{t:'Sebero Herbal-Currant', p:55, s:7}, {t:'Darkside Medium Lemon Secret', p:35, s:8}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Лесной цитрус — это терпкий цитрусовый акцент на языке. Herbal-Currant составляет основу (~55%), Medium Lemon Secret вносит цитрусовую терпкость (~35%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Райский пломбир', tags:['dessert','exotic','fruity'], recipe:[{t:'Overdose Multibonbon', p:55, s:9}, {t:'Element Земля — Личи', p:25, s:6}, {t:'Musthave Ванильный крем', p:20, s:6}], note:'Райский пломбир — это тающий пломбир в жаркий полдень. Multibonbon составляет основу (~55%), Земля — Личи усиливает экзотическую нотку (~25%), Ванильный крем закрывает микс лёгким акцентом (~20%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сладкий фреш', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:80, s:9}, {t:'Sebero Bubble Gum', p:12, s:4}, {t:'Musthave Ванильный крем', p:8, s:6}], note:'Сладкий фреш — это свежевыжатый сок в самом начале дня. Multibonbon составляет основу (~80%), Bubble Gum усиливает десертную сладость (~12%), Ванильный крем закрывает микс лёгким акцентом (~8%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сочная россыпь', tags:['berry','drink'], recipe:[{t:'Chabacco Strong Cola', p:75, s:8}, {t:'Deus Guinness', p:15, s:6}, {t:'Spectrum Medium Line Cherry Cola', p:10, s:6}], note:'Сочная россыпь — это россыпь спелых ягод в горсти. Strong Cola составляет основу (~75%), Guinness подчёркивает напиточный характер (~15%), Medium Line Cherry Cola закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Коктейльный бар', tags:['dessert','drink','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:78, s:9}, {t:'Spectrum Grape Soda', p:14, s:6}, {t:'Chabacco Medium Peach Ice', p:8, s:5}], note:'Коктейльный бар — это атмосфера бара поздним вечером. Multibonbon составляет основу (~78%), Grape Soda усиливает напиточный характер (~14%), Medium Peach Ice закрывает микс лёгким холодком, не больше 8%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Кислый крем', tags:['citrus','dessert','exotic','mint'], recipe:[{t:'Black Burn Rakuto', p:85, s:8}, {t:'Sebero Mango Yogurt', p:10, s:7}, {t:'Darkside Base Sicily Mint', p:5, s:5}], note:'Кислый крем — это нежный крем, который тает на языке. Rakuto составляет основу (~85%), Mango Yogurt подчёркивает экзотическую нотку (~10%), Base Sicily Mint закрывает микс лёгким холодком, не больше 5%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сладкий пломбир', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:80, s:9}, {t:'Sebero Vanilla', p:12, s:5}, {t:'Chabacco Medium Peach Ice', p:8, s:5}], note:'Сладкий пломбир — это тающий пломбир в жаркий полдень. Multibonbon составляет основу (~80%), Vanilla усиливает фруктовую сочность (~12%), Medium Peach Ice закрывает микс лёгким холодком, не больше 8%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Цитрусовый остров', tags:['citrus','exotic'], recipe:[{t:'Black Burn Rakuto', p:85, s:8}, {t:'Darkside Bounty Hunter', p:10, s:6}, {t:'Darkside Core Grapefruit', p:5, s:6}], note:'Цитрусовый остров — это уединённый остров вдали от всех. Rakuto составляет основу (~85%), Bounty Hunter вносит экзотическую нотку (~10%), Core Grapefruit закрывает микс лёгким акцентом (~5%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Уютный джем', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:65, s:9}, {t:'Musthave Raspberry Jam', p:25, s:5}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Уютный джем — это густой ягодный джем на подаче. Multibonbon составляет основу (~65%), Raspberry Jam добавляет десертную сладость (~25%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Уютный сад', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:78, s:9}, {t:'Starline Виноградное желе', p:14, s:4}, {t:'Chabacco Medium Peach Ice', p:8, s:5}], note:'Уютный сад — это прогулка по фруктовому саду в жаркий день. Multibonbon составляет основу (~78%), Виноградное желе добавляет фруктовую сочность (~14%), Medium Peach Ice закрывает микс лёгким холодком, не больше 8%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сладкий крем', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:75, s:9}, {t:'Sarma Клубника со сливками', p:15, s:4}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Сладкий крем — это нежный крем, который тает на языке. Multibonbon составляет основу (~75%), Клубника со сливками добавляет десертную сладость (~15%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Кремовый фреш', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:58, s:9}, {t:'Musthave Ванильный крем', p:32, s:6}, {t:'Chabacco Medium Peach Ice', p:10, s:5}], note:'Кремовый фреш — это свежевыжатый сок в самом начале дня. Multibonbon составляет основу (~58%), Ванильный крем усиливает десертную сладость (~32%), Medium Peach Ice закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Коктейльный табак', tags:['classic','drink','mint'], recipe:[{t:'Chabacco Strong Cola', p:70, s:8}, {t:'Jent Brisky Whiskey', p:20, s:6}, {t:'Хулиган Hard — Мята', p:10, s:9}], note:'Коктейльный табак — это плотный табачный дым старой школы. Strong Cola составляет основу (~70%), Brisky Whiskey усиливает напиточный характер (~20%), Hard — Мята закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Терпкий всплеск', tags:['berry','citrus','spice'], recipe:[{t:'Darkside Medium Lemon Secret', p:80, s:8}, {t:'Sebero Herbal-Currant', p:12, s:7}, {t:'Darkside Core Grapefruit', p:8, s:6}], note:'Терпкий всплеск — это резкий, яркий всплеск на вдохе. Medium Lemon Secret составляет основу (~80%), Herbal-Currant усиливает пряную нотку (~12%), Core Grapefruit закрывает микс лёгким акцентом (~8%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Домашний крем', tags:['citrus','dessert','exotic'], recipe:[{t:'Black Burn Rakuto', p:78, s:8}, {t:'WTO Skywalker', p:14, s:6}, {t:'Musthave Ванильный крем', p:8, s:6}], note:'Домашний крем — это нежный крем, который тает на языке. Rakuto составляет основу (~78%), Skywalker добавляет экзотическую нотку (~14%), Ванильный крем закрывает микс лёгким акцентом (~8%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сладкий сад', tags:['dessert','floral','fruity'], recipe:[{t:'Overdose Multibonbon', p:70, s:9}, {t:'Adalya Rose Lokum', p:20, s:4}, {t:'Musthave Ванильный крем', p:10, s:6}], note:'Сладкий сад — это прогулка по фруктовому саду в жаркий день. Multibonbon составляет основу (~70%), Rose Lokum добавляет цветочный шлейф (~20%), Ванильный крем закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Кремовый сад', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:60, s:9}, {t:'Sebero Garnet', p:25, s:7}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Кремовый сад — это прогулка по фруктовому саду в жаркий день. Multibonbon составляет основу (~60%), Garnet усиливает фруктовую сочность (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Фруктовый крем', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Black Burn Sweet Peach', p:10, s:7}, {t:'Chabacco Medium Peach Ice', p:5, s:5}], note:'Фруктовый крем — это нежный крем, который тает на языке. Multibonbon составляет основу (~85%), Sweet Peach подчёркивает фруктовую сочность (~10%), Medium Peach Ice закрывает микс лёгким холодком, не больше 5%. Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Садовый урожай', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Darkside Bananapapa', p:10, s:6}, {t:'Musthave Ванильный крем', p:5, s:6}], note:'Садовый урожай — это собранный утром спелый урожай. Multibonbon составляет основу (~85%), Bananapapa подчёркивает фруктовую сочность (~10%), Ванильный крем закрывает микс лёгким акцентом (~5%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Домашний остров', tags:['dessert','exotic','fruity'], recipe:[{t:'Overdose Multibonbon', p:80, s:9}, {t:'Sebero Mango Yogurt', p:12, s:7}, {t:'Musthave Ванильный крем', p:8, s:6}], note:'Домашний остров — это уединённый остров вдали от всех. Multibonbon составляет основу (~80%), Mango Yogurt подчёркивает экзотическую нотку (~12%), Ванильный крем закрывает микс лёгким акцентом (~8%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сладкий десерт', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Darkside Breaking Red', p:10, s:6}, {t:'Musthave Ванильный крем', p:5, s:6}], note:'Сладкий десерт — это десертный стол в конце ужина. Multibonbon составляет основу (~85%), Breaking Red добавляет фруктовую сочность (~10%), Ванильный крем закрывает микс лёгким акцентом (~5%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Садовый десерт', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Black Burn Sweet Peach', p:10, s:7}, {t:'Musthave Ванильный крем', p:5, s:6}], note:'Садовый десерт — это десертный стол в конце ужина. Multibonbon составляет основу (~85%), Sweet Peach добавляет фруктовую сочность (~10%), Ванильный крем закрывает микс лёгким акцентом (~5%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Домашний сад', tags:['dessert','fruity','mint'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Sebero Garnet', p:10, s:7}, {t:'Chabacco Medium Peach Ice', p:5, s:5}], note:'Домашний сад — это прогулка по фруктовому саду в жаркий день. Multibonbon составляет основу (~85%), Garnet усиливает фруктовую сочность (~10%), Medium Peach Ice закрывает микс лёгким холодком, не больше 5%. Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Уютный рассвет', tags:['dessert','fruity'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Bonche Dark Chocolate', p:10, s:6}, {t:'Musthave Ванильный крем', p:5, s:6}], note:'Уютный рассвет — это первые тёплые лучи, которые будят вкус. Multibonbon составляет основу (~85%), Dark Chocolate подчёркивает десертную сладость (~10%), Ванильный крем закрывает микс лёгким акцентом (~5%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Уютный коктейль', tags:['dessert','drink','fruity'], recipe:[{t:'Overdose Multibonbon', p:85, s:9}, {t:'Spectrum Grape Soda', p:10, s:6}, {t:'Musthave Ванильный крем', p:5, s:6}], note:'Уютный коктейль — это вечер в баре за неспешным коктейлем. Multibonbon составляет основу (~85%), Grape Soda добавляет напиточный характер (~10%), Ванильный крем закрывает микс лёгким акцентом (~5%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Кремовый джем', tags:['berry','dessert','mint'], recipe:[{t:'Sarma Клубника со сливками', p:50, s:4}, {t:'Sebero Strawberry', p:28, s:4}, {t:'Darkside Code Cherry', p:12, s:6}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Кремовый джем — это густой ягодный джем на подаче. Клубника со сливками составляет основу (~50%), Strawberry подчёркивает десертную сладость (~28%), Code Cherry усиливает ягодную кислинку (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Терпкий бриз', tags:['berry','citrus','dessert','mint'], recipe:[{t:'Black Burn Haribon', p:50, s:4}, {t:'Sebero Strawberry', p:28, s:4}, {t:'Sebero Lemon Candy', p:12, s:4}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Терпкий бриз — это лёгкий ветер с цитрусовой нотой. Haribon составляет основу (~50%), Strawberry добавляет десертную сладость (~28%), Lemon Candy добавляет цитрусовую терпкость (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кремовый пломбир', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Musthave Raspberry Jam', p:50, s:5}, {t:'Sebero Vanilla', p:28, s:5}, {t:'Северный Кучерявый персик', p:12, s:5}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Кремовый пломбир — это тающий пломбир в жаркий полдень. Raspberry Jam составляет основу (~50%), Vanilla вносит десертную сладость (~28%), Кучерявый персик добавляет фруктовую сочность (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Ягодная россыпь', tags:['berry','dessert','mint'], recipe:[{t:'Sarma Клубника со сливками', p:50, s:4}, {t:'Trofimoff\'S Hurtleberry', p:28, s:6}, {t:'Darkside Blueberry Blast', p:12, s:6}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Ягодная россыпь — это россыпь спелых ягод в горсти. Клубника со сливками составляет основу (~50%), Hurtleberry вносит ягодную кислинку (~28%), Blueberry Blast вносит ягодную кислинку (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сладкий ягодник', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Musthave Raspberry Jam', p:50, s:5}, {t:'Sarma Клубника со сливками', p:28, s:4}, {t:'Duft Cherry Juice', p:12, s:5}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Сладкий ягодник — это сбор ягод прямо с куста. Raspberry Jam составляет основу (~50%), Клубника со сливками вносит десертную сладость (~28%), Cherry Juice подчёркивает фруктовую сочность (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сладкий джем', tags:['berry','dessert','mint'], recipe:[{t:'Darkside Cherry Rocks', p:50, s:5}, {t:'Sarma Клубника со сливками', p:28, s:4}, {t:'Starline Клубничный мильфей', p:12, s:4}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Сладкий джем — это густой ягодный джем на подаче. Cherry Rocks составляет основу (~50%), Клубника со сливками добавляет десертную сладость (~28%), Клубничный мильфей подчёркивает десертную сладость (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Домашний морс', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Darkside Blueberry Blast', p:50, s:6}, {t:'Sarma Клубника со сливками', p:28, s:4}, {t:'Duft Cherry Juice', p:12, s:5}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Домашний морс — это домашний ягодный морс со льдом. Blueberry Blast составляет основу (~50%), Клубника со сливками добавляет десертную сладость (~28%), Cherry Juice вносит фруктовую сочность (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Спелый десерт', tags:['berry','dessert','mint'], recipe:[{t:'Darkside Blackcurrant', p:50, s:6}, {t:'Darkside Cherry Rocks', p:28, s:5}, {t:'Sebero Strawberry', p:12, s:4}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Спелый десерт — это десертный стол в конце ужина. Blackcurrant составляет основу (~50%), Cherry Rocks добавляет ягодную кислинку (~28%), Strawberry усиливает десертную сладость (~12%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Дальний остров', tags:['exotic','fruity','mint'], recipe:[{t:'Darkside Bananapapa', p:50, s:6}, {t:'Bonche Гуава-маракуйя', p:28, s:5}, {t:'Северный Кучерявый персик', p:12, s:5}, {t:'Element Огонь — Дыня-мята', p:10, s:7}], note:'Дальний остров — это уединённый остров вдали от всех. Bananapapa составляет основу (~50%), Гуава-маракуйя добавляет фруктовую сочность (~28%), Кучерявый персик усиливает фруктовую сочность (~12%), Огонь — Дыня-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Морозный рассвет', tags:['fruity','mint'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Darkside Bananapapa', p:28, s:6}, {t:'Северный Кучерявый персик', p:12, s:5}, {t:'Element Огонь — Дыня-мята', p:10, s:7}], note:'Морозный рассвет — это первые тёплые лучи, которые будят вкус. Breaking Red составляет основу (~50%), Bananapapa усиливает фруктовую сочность (~28%), Кучерявый персик усиливает фруктовую сочность (~12%), Огонь — Дыня-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелый рассвет', tags:['exotic','fruity','mint'], recipe:[{t:'Element Земля — Личи', p:50, s:6}, {t:'Северный Кучерявый персик', p:28, s:5}, {t:'Darkside Bananapapa', p:12, s:6}, {t:'Element Огонь — Дыня-мята', p:10, s:7}], note:'Спелый рассвет — это первые тёплые лучи, которые будят вкус. Земля — Личи составляет основу (~50%), Кучерявый персик усиливает фруктовую сочность (~28%), Bananapapa вносит фруктовую сочность (~12%), Огонь — Дыня-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Райский сад', tags:['exotic','fruity','mint'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Северный Кучерявый персик', p:28, s:5}, {t:'Bonche Гуава-маракуйя', p:12, s:5}, {t:'Black Burn Kiwi Stoner', p:10, s:6}], note:'Райский сад — это прогулка по фруктовому саду в жаркий день. Breaking Red составляет основу (~50%), Кучерявый персик усиливает фруктовую сочность (~28%), Гуава-маракуйя добавляет фруктовую сочность (~12%), Kiwi Stoner закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Дальний рай', tags:['dessert','exotic','fruity','mint'], recipe:[{t:'Bonche Гуава-маракуйя', p:50, s:5}, {t:'Overdose Multibonbon', p:28, s:9}, {t:'Starline Виноградное желе', p:12, s:4}, {t:'Black Burn Kiwi Stoner', p:10, s:6}], note:'Дальний рай — это кусочек тропического рая в чаше. Гуава-маракуйя составляет основу (~50%), Multibonbon подчёркивает фруктовую сочность (~28%), Виноградное желе вносит фруктовую сочность (~12%), Kiwi Stoner закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Терпкий джем', tags:['berry','citrus','fruity','mint'], recipe:[{t:'Darkside Core Grapefruit', p:50, s:6}, {t:'Adalya Lady Killer', p:28, s:6}, {t:'Duft Cherry Juice', p:12, s:5}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Терпкий джем — это густой ягодный джем на подаче. Core Grapefruit составляет основу (~50%), Lady Killer добавляет цитрусовую терпкость (~28%), Cherry Juice добавляет фруктовую сочность (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Садовый рассвет', tags:['dessert','fruity','mint'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Nаш Чупа чупс', p:28, s:5}, {t:'Musthave Ванильный крем', p:12, s:6}, {t:'Element Огонь — Дыня-мята', p:10, s:7}], note:'Садовый рассвет — это первые тёплые лучи, которые будят вкус. Breaking Red составляет основу (~50%), Чупа чупс добавляет фруктовую сочность (~28%), Ванильный крем вносит десертную сладость (~12%), Огонь — Дыня-мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Экзотичный заряд', tags:['citrus','exotic','floral','mint'], recipe:[{t:'Black Burn Rakuto', p:50, s:8}, {t:'Darkside Core Grapefruit', p:28, s:6}, {t:'Deus Rose Grapefruit', p:12, s:6}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Экзотичный заряд — это бодрящий цитрусовый импульс с утра. Rakuto составляет основу (~50%), Core Grapefruit добавляет цитрусовую терпкость (~28%), Rose Grapefruit усиливает цветочный шлейф (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Барный бриз', tags:['citrus','drink','exotic','mint'], recipe:[{t:'Duft Aperol Spritz', p:50, s:6}, {t:'Black Burn Rakuto', p:28, s:8}, {t:'Sebero Root Beer', p:12, s:7}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Барный бриз — это лёгкий ветер с цитрусовой нотой. Aperol Spritz составляет основу (~50%), Rakuto вносит экзотическую нотку (~28%), Root Beer добавляет напиточный характер (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Коктейльный заряд', tags:['citrus','drink','mint','spice'], recipe:[{t:'Duft Aperol Spritz', p:50, s:6}, {t:'Darkside Medium Lemon Secret', p:28, s:8}, {t:'Deus Guinness', p:12, s:6}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Коктейльный заряд — это бодрящий цитрусовый импульс с утра. Aperol Spritz составляет основу (~50%), Medium Lemon Secret усиливает пряную нотку (~28%), Guinness подчёркивает напиточный характер (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Терпкий полдень', tags:['citrus','drink','exotic','mint'], recipe:[{t:'Black Burn Rakuto', p:50, s:8}, {t:'Darkside Bloody Orange', p:28, s:6}, {t:'Duft Aperol Spritz', p:12, s:6}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Терпкий полдень — это ленивый полдень на летней веранде. Rakuto составляет основу (~50%), Bloody Orange вносит цитрусовую терпкость (~28%), Aperol Spritz добавляет напиточный характер (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кислый тропик', tags:['citrus','exotic','fruity','mint'], recipe:[{t:'Black Burn Rakuto', p:50, s:8}, {t:'Darkside Bounty Hunter', p:28, s:6}, {t:'Sarma Дыня', p:12, s:3}, {t:'Musthave Ice Bergamot', p:10, s:6}], note:'Кислый тропик — это влажный тропический воздух. Rakuto составляет основу (~50%), Bounty Hunter подчёркивает экзотическую нотку (~28%), Дыня подчёркивает фруктовую сочность (~12%), Ice Bergamot закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Терпкий цитрус', tags:['citrus','dessert','exotic','spice'], recipe:[{t:'Black Burn Rakuto', p:45, s:8}, {t:'Darkside Medium Lemon Secret', p:30, s:8}, {t:'Sebero Mango Yogurt', p:15, s:7}, {t:'Sarma 360 Помело-грейпфрут', p:10, s:5}], note:'Терпкий цитрус — это терпкий цитрусовый акцент на языке. Rakuto составляет основу (~45%), Medium Lemon Secret вносит пряную нотку (~30%), Mango Yogurt добавляет экзотическую нотку (~15%), 360 Помело-грейпфрут закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Терпкий крем', tags:['citrus','dessert','exotic','mint','spice'], recipe:[{t:'Black Burn Rakuto', p:50, s:8}, {t:'Darkside Medium Lemon Secret', p:28, s:8}, {t:'Sebero Mango Yogurt', p:12, s:7}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Терпкий крем — это нежный крем, который тает на языке. Rakuto составляет основу (~50%), Medium Lemon Secret вносит пряную нотку (~28%), Mango Yogurt подчёркивает экзотическую нотку (~12%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сочный пирог', tags:['berry','dessert','fruity'], recipe:[{t:'Musthave Ванильный крем', p:55, s:6}, {t:'Overdose Multibonbon', p:30, s:9}, {t:'Musthave Raspberry Jam', p:15, s:5}], note:'Сочный пирог — это свежая выпечка, только из духовки. Ванильный крем составляет основу (~55%), Multibonbon подчёркивает десертную сладость (~30%), Raspberry Jam закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Жгучий огонёк', tags:['citrus','mint','spice'], recipe:[{t:'Darkside Core Grapefruit', p:55, s:6}, {t:'Darkside Medium Lemon Secret', p:35, s:8}, {t:'Darkside Base Sicily Mint', p:10, s:5}], note:'Жгучий огонёк — это тлеющий огонёк пряности где-то на фоне. Core Grapefruit составляет основу (~55%), Medium Lemon Secret усиливает пряную нотку (~35%), Base Sicily Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Бодрящий рай', tags:['citrus','exotic','spice'], recipe:[{t:'Darkside Core Grapefruit', p:55, s:6}, {t:'Black Burn Rakuto', p:30, s:8}, {t:'Darkside Medium Lemon Secret', p:15, s:8}], note:'Бодрящий рай — это кусочек тропического рая в чаше. Core Grapefruit составляет основу (~55%), Rakuto усиливает экзотическую нотку (~30%), Medium Lemon Secret закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+];
+
+// ---------- Favorites (liked mixes) ----------
+// Use index-based IDs: the previous slugify() stripped non-ASCII characters,
+// which collapsed almost every Cyrillic mix name down to the same id (e.g. "_")
+// and caused liking one mix to visually "like" several others that shared that id.
+MIX_RECIPES.forEach((m, i)=>{ m.id = 'mix_' + i; m.brands = detectBrandsInRecipe(m.recipe); });
+
+let favoriteIds = new Set();
+const hasWidgetStorage = typeof window.storage !== 'undefined';
+
+async function loadFavorites(){
+  try{
+    if (hasWidgetStorage){
+      const res = await window.storage.get('favorite_mix_ids', false);
+      if (res && res.value){
+        favoriteIds = new Set(JSON.parse(res.value));
+      }
+    }
+  }catch(e){
+    // key not found yet or storage unavailable — start with empty favorites
+  }
+  updateFavCountBadge();
+  renderFavorites();
+}
+
+async function saveFavorites(){
+  try{
+    if (hasWidgetStorage){
+      await window.storage.set('favorite_mix_ids', JSON.stringify([...favoriteIds]), false);
+    }
+  }catch(e){
+    console.error('Не удалось сохранить избранное:', e);
+  }
+}
+
+function toggleFavorite(id){
+  if (favoriteIds.has(id)) favoriteIds.delete(id);
+  else favoriteIds.add(id);
+  saveFavorites();
+  updateFavCountBadge();
+  rerenderRecipeCardsOnly();
+  renderFavorites();
+}
+window.toggleFavorite = toggleFavorite;
+
+function updateFavCountBadge(){
+  const badge = document.getElementById('favCountBadge');
+  if (!badge) return;
+  if (favoriteIds.size > 0){
+    badge.style.display = 'inline-flex';
+    badge.textContent = favoriteIds.size;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function buildMixCardHtml(m, opts){
+  opts = opts || {};
+  const tagsHtml = m.tags.map(t=>{
+    const cat = CATEGORIES.find(c=>c.key===t);
+    return `<span class="tag-pill">${cat ? cat.icon+' '+cat.label : t}</span>`;
+  }).join('');
+  const recipeLines = m.recipe.map(item=>`<b>${item.t}</b> — ${item.p}%`).join('<br>');
+  const liked = favoriteIds.has(m.id);
+  const matchLabel = (opts.showMatch && typeof m.diff === 'number')
+    ? `<div class="match-tag">${m.diff === 0 ? 'Точное попадание по крепости' : `Крепость отличается на ${m.diff}`}</div>`
+    : '';
+  return `
+    <div class="mix-card">
+      <div class="mix-top">
+        <div class="mix-name">${m.name}</div>
+        <div class="mix-actions">
+          <span class="mix-rating">${m.strength}/10</span>
+          <button class="like-btn ${liked?'liked':''}" onclick="toggleFavorite('${m.id}')" title="${liked?'Убрать из избранного':'В избранное'}">${liked?'♥':'♡'}</button>
+        </div>
+      </div>
+      ${matchLabel}
+      <div class="card-tags">${tagsHtml}</div>
+      <p class="mix-recipe">${recipeLines}</p>
+      <p class="card-note">${m.note}</p>
+    </div>
+  `;
+}
+
+function computeRecipeStrength(recipe){
+  const weighted = recipe.reduce((sum, item)=> sum + item.s * (item.p/100), 0);
+  return Math.round(weighted);
+}
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Buckets diff into coarse relevance tiers so exact strength-diff ties (and
+// near-ties) get shuffled against each other instead of always resolving
+// to the same order for identical filters.
+function diffBucket(diff){
+  if (diff <= 1) return 0;
+  if (diff <= 3) return 1;
+  return 2;
+}
+
+function findRecipeMatches(){
+  const target = parseInt(slider.value,10);
+  const cats = selected;
+
+  let pool = MIX_RECIPES.map(m=>{
+    const tagHits = cats.size === 0 ? 0 : m.tags.filter(t=>cats.has(t)).length;
+    const strength = computeRecipeStrength(m.recipe);
+    const diff = Math.abs(strength - target);
+    return { ...m, tagHits, strength, diff };
+  });
+
+  if (cats.size > 0){
+    pool = pool.filter(m=>m.tagHits > 0);
+  }
+  if (selectedBrands.size > 0){
+    pool = pool.filter(m=> m.brands.some(b=>selectedBrands.has(b)));
+  }
+
+  // Shuffle first: since sort() is stable, this randomizes the order of
+  // items that end up tied on tagHits/diffBucket, while items with a
+  // genuinely better match still sort ahead of worse ones.
+  pool = shuffleArray(pool);
+
+  pool.sort((a,b)=>{
+    if (cats.size>0 && b.tagHits !== a.tagHits) return b.tagHits - a.tagHits;
+    return diffBucket(a.diff) - diffBucket(b.diff);
+  });
+
+  // Safety net: guarantee every mix in the results is unique (by id), even if
+  // upstream data ever contains near-duplicate entries.
+  const seen = new Set();
+  const unique = [];
+  for (const m of pool){
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+    unique.push(m);
+  }
+
+  return unique.slice(0, 5);
+}
+
+let lastRecipeMatches = [];
+
+function renderRecipes(){
+  const recipeSub = document.getElementById('recipeSub');
+  const recipeResultsEl = document.getElementById('recipeResults');
+  const reshuffleBtn = document.getElementById('reshuffleBtn');
+  const matches = findRecipeMatches();
+  lastRecipeMatches = matches;
+
+  if (matches.length === 0){
+    recipeSub.textContent = 'Под такое сочетание готового микса не нашлось — попробуй ослабить фильтр по вкусу или бренду.';
+    recipeResultsEl.innerHTML = '<div class="empty">Совпадений нет. Убери один-два вкусовых фильтра, бренд или измени крепость.</div>';
+    reshuffleBtn.style.display = 'none';
+    return;
+  }
+
+  recipeSub.textContent = `Собрал ${matches.length} микса под этот запрос — с составом и примерной крепостью.`;
+  recipeResultsEl.innerHTML = matches.map(m=> buildMixCardHtml(m, { showMatch:true })).join('');
+
+  // Only worth showing "shuffle again" if there's a larger pool behind these
+  // 5 results — otherwise reshuffling would just reorder the same items.
+  const poolSize = poolSizeForCurrentFilters();
+  reshuffleBtn.style.display = poolSize > matches.length ? 'block' : 'none';
+}
+
+// Re-renders the currently-shown 5 mix cards from the cached list (no
+// re-filtering, no re-shuffling) — used when only the like state changed,
+// so liking one card doesn't reshuffle or swap out the other four.
+function rerenderRecipeCardsOnly(){
+  const recipeResultsEl = document.getElementById('recipeResults');
+  if (lastRecipeMatches.length === 0) return;
+  recipeResultsEl.innerHTML = lastRecipeMatches.map(m=> buildMixCardHtml(m, { showMatch:true })).join('');
+}
+
+function poolSizeForCurrentFilters(){
+  const cats = selected;
+  let pool = MIX_RECIPES;
+  if (cats.size > 0){
+    pool = pool.filter(m=> m.tags.some(t=>cats.has(t)));
+  }
+  if (selectedBrands.size > 0){
+    pool = pool.filter(m=> m.brands.some(b=>selectedBrands.has(b)));
+  }
+  return pool.length;
+}
+
+function renderFavorites(){
+  const favSub = document.getElementById('favSub');
+  const favResultsEl = document.getElementById('favResults');
+  if (!favSub || !favResultsEl) return;
+
+  const favMixes = MIX_RECIPES.filter(m=> favoriteIds.has(m.id)).map(m=>({
+    ...m, strength: computeRecipeStrength(m.recipe)
+  }));
+
+  if (favMixes.length === 0){
+    favSub.textContent = 'Пока пусто.';
+    favResultsEl.innerHTML = '<div class="empty">Нажми на ♡ на понравившемся миксе во вкладке «Подбор вкуса» — он появится здесь.</div>';
+    return;
+  }
+
+  favSub.textContent = `Сохранено ${favMixes.length} ${favMixes.length===1?'микс':(favMixes.length>=2&&favMixes.length<=4?'микса':'миксов')}.`;
+  favResultsEl.innerHTML = favMixes.map(m=> buildMixCardHtml(m, { showMatch:false })).join('');
+}
+
+function render(){
+  const target = parseInt(slider.value,10);
+  const matches = findMatches();
+  resultsEl.innerHTML = '';
+
+  if (matches.length === 0){
+    resultsSub.textContent = 'Под такое сочетание ничего не нашлось — попробуй ослабить фильтр по вкусу или бренду.';
+    resultsEl.innerHTML = '<div class="empty">Совпадений нет. Убери один-два вкусовых фильтра, бренд или измени крепость.</div>';
+    return;
+  }
+
+  resultsSub.textContent = `Нашли ${matches.length} подходящих вариантов — от ближе к твоей крепости к дальше.`;
+
+  matches.forEach(f=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const tagsHtml = f.tags.map(t=>{
+      const cat = CATEGORIES.find(c=>c.key===t);
+      return `<span class="tag-pill">${cat ? cat.icon+' '+cat.label : t}</span>`;
+    }).join('');
+    const matchLabel = f.diff === 0 ? 'Точное попадание по крепости' : `Крепость отличается на ${f.diff}`;
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="card-name">${f.name}</div>
+          <div class="card-brand">${f.brand}</div>
+        </div>
+        <div class="strength-badge">${f.strength}</div>
+      </div>
+      <div class="match-tag">${matchLabel}</div>
+      <div class="card-tags">${tagsHtml}</div>
+      <p class="card-note">${f.note}</p>
+    `;
+    resultsEl.appendChild(card);
+  });
+}
+
+
+document.getElementById('ctaBtn').addEventListener('click', ()=>{
+  renderRecipes();
+  render();
+  try{
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback){
+      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+  }catch(e){}
+  document.getElementById('recipeResults').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('reshuffleBtn').addEventListener('click', ()=>{
+  renderRecipes();
+  try{
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback){
+      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+  }catch(e){}
+});
+
+// ---------- Tab switching ----------
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+    if (tab.dataset.view === 'favorites') renderFavorites();
+  });
+});
+
+loadFavorites();
+</script>
+</body>
+</html>
