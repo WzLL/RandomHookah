@@ -1322,20 +1322,102 @@ let photoDetectedItems = [];
 // so the browser already opens the file picker on click natively —
 // no extra JS listener needed here (that used to cause a double-open).
 
-photoFileInput.addEventListener('change', ()=>{
+// Loads heic2any from CDN once, on demand (most photos aren't HEIC, so we
+// don't pay for this library unless we actually need it).
+let heic2anyLoadPromise = null;
+function loadHeic2Any(){
+  if (window.heic2any) return Promise.resolve();
+  if (heic2anyLoadPromise) return heic2anyLoadPromise;
+  heic2anyLoadPromise = new Promise((resolve, reject)=>{
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.1/index.min.js';
+    script.onload = resolve;
+    script.onerror = ()=> reject(new Error('heic2any failed to load'));
+    document.head.appendChild(script);
+  });
+  return heic2anyLoadPromise;
+}
+
+function isLikelyHeic(file){
+  const type = (file.type || '').toLowerCase();
+  const name = (file.name || '').toLowerCase();
+  return type === 'image/heic' || type === 'image/heif' || /\.(heic|heif)$/.test(name);
+}
+
+// Draws any browser-decodable image (Blob/File) onto a canvas and exports
+// a real, honest JPEG — normalizes format and downscales large phone photos.
+function resizeToJpeg(blobOrFile){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(blobOrFile);
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX_DIM = 1600;
+      let { width, height } = img;
+      if (width > MAX_DIM || height > MAX_DIM){
+        const scale = MAX_DIM / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = ()=>{
+      URL.revokeObjectURL(url);
+      reject(new Error('decode failed'));
+    };
+    img.src = url;
+  });
+}
+
+async function processSelectedPhoto(file){
+  // HEIC/HEIF (default format on iPhones) needs explicit conversion —
+  // we don't rely on the browser being able to display it natively, since
+  // that support is inconsistent across iOS/Android/Windows/Mac/Linux.
+  if (isLikelyHeic(file)){
+    photoUploadLabel.textContent = 'Конвертирую HEIC-фото...';
+    await loadHeic2Any();
+    const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+    const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+    return resizeToJpeg(jpegBlob);
+  }
+  // Everything else (JPEG, PNG, WebP, GIF, BMP from any OS/browser) —
+  // try native decode first.
+  try{
+    return await resizeToJpeg(file);
+  }catch(e){
+    // Safety net: some browsers mislabel HEIC files with a generic MIME
+    // type, so if native decode fails, try the HEIC converter anyway.
+    photoUploadLabel.textContent = 'Пробую другой способ прочитать фото...';
+    await loadHeic2Any();
+    const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+    const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+    return resizeToJpeg(jpegBlob);
+  }
+}
+
+photoFileInput.addEventListener('change', async ()=>{
   const file = photoFileInput.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    const dataUrl = reader.result;
-    photoBase64 = dataUrl.split(',')[1];
-    photoPreview.src = dataUrl;
+
+  photoUploadLabel.textContent = 'Обрабатываю фото...';
+  photoAnalyzeBtn.style.display = 'none';
+
+  try{
+    const jpegDataUrl = await processSelectedPhoto(file);
+    photoBase64 = jpegDataUrl.split(',')[1];
+    photoPreview.src = jpegDataUrl;
     photoPreview.style.display = 'block';
     photoUploadLabel.textContent = 'Фото выбрано — можно поменять, нажав ещё раз';
     photoAnalyzeBtn.style.display = 'block';
     photoStatus.style.display = 'none';
-  };
-  reader.readAsDataURL(file);
+  }catch(err){
+    photoUploadLabel.textContent = 'Не удалось прочитать это фото (формат не поддерживается) — попробуй другое.';
+    photoPreview.style.display = 'none';
+  }
 });
 
 photoAnalyzeBtn.addEventListener('click', async ()=>{
