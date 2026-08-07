@@ -1420,40 +1420,60 @@ photoFileInput.addEventListener('change', async ()=>{
   }
 });
 
+const PHOTO_MAX_ATTEMPTS = 10;
+
+async function callAnalyzeOnce(){
+  const resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageBase64: photoBase64 })
+  });
+  const data = await resp.json();
+  if (!resp.ok || data.error){
+    throw new Error(data.error || 'ошибка сервиса');
+  }
+  return Array.isArray(data.items) ? data.items : [];
+}
+
 photoAnalyzeBtn.addEventListener('click', async ()=>{
   if (!photoBase64) return;
   photoStatus.style.display = 'block';
-  photoStatus.textContent = 'Анализируем фото — обычно занимает 5-15 секунд...';
   photoAnalyzeBtn.disabled = true;
 
-  try{
-    const resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: photoBase64 })
-    });
-    const data = await resp.json();
+  let items = [];
+  let lastErrorMsg = null;
 
-    if (!resp.ok || data.error){
-      photoStatus.textContent = 'Не получилось распознать: ' + (data.error || 'ошибка сервиса') + '. Попробуй другое фото.';
-      photoAnalyzeBtn.disabled = false;
-      return;
+  for (let attempt = 1; attempt <= PHOTO_MAX_ATTEMPTS; attempt++){
+    photoStatus.textContent = attempt === 1
+      ? 'Анализируем фото — обычно занимает 5-15 секунд...'
+      : `Не получилось с первого раза, пробуем ещё (попытка ${attempt} из ${PHOTO_MAX_ATTEMPTS})...`;
+    try{
+      items = await callAnalyzeOnce();
+      lastErrorMsg = null;
+      if (items.length > 0) break; // success — no need to keep retrying
+    }catch(err){
+      lastErrorMsg = err.message;
+      // A hard error (network/service) — still worth retrying, the next
+      // attempt might just work, but no point burning all 5 tries on a
+      // clearly broken connection.
     }
-
-    photoDetectedItems = Array.isArray(data.items) ? data.items : [];
-    if (photoDetectedItems.length === 0){
-      photoStatus.textContent = 'На фото не удалось найти ничего похожего на табак для кальяна. Попробуй фото почётче или с другого ракурса.';
-      photoAnalyzeBtn.disabled = false;
-      return;
-    }
-
-    photoStatus.style.display = 'none';
-    photoAnalyzeBtn.disabled = false;
-    showPhotoStep2();
-  }catch(err){
-    photoStatus.textContent = 'Ошибка сети: ' + err.message + '. Проверь соединение и попробуй снова.';
-    photoAnalyzeBtn.disabled = false;
   }
+
+  photoAnalyzeBtn.disabled = false;
+
+  if (lastErrorMsg && items.length === 0){
+    photoStatus.textContent = `Не получилось распознать после ${PHOTO_MAX_ATTEMPTS} попыток: ${lastErrorMsg}. Попробуй ещё раз чуть позже.`;
+    return;
+  }
+
+  photoDetectedItems = items;
+  if (photoDetectedItems.length === 0){
+    photoStatus.textContent = `Проверили фото ${PHOTO_MAX_ATTEMPTS} раз — ничего похожего на табак для кальяна не нашлось. Попробуй фото почётче, светлее или с другого ракурса.`;
+    return;
+  }
+
+  photoStatus.style.display = 'none';
+  showPhotoStep2();
 });
 
 function showPhotoStep2(){
