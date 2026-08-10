@@ -752,6 +752,10 @@ const FLAVORS = [
   { name:'Cinnamon Rolls', brand:'Musthave', strength:5, tags:['dessert'], note:'Сладкая булочка с корицей и глазурью — насыщенный выпечечный десерт, по отзывам довольно интенсивный.' },
   { name:'Original Popcorn', brand:'Black Burn', strength:6, tags:['dessert'], note:'Сладко-масляный попкорн — один из фирменных «кукурузных» вкусов бренда.' },
   { name:'Apple Drops', brand:'Musthave', strength:5, tags:['fruity','dessert'], note:'Сочные яблочные леденцы без аниса — сладко-кислое зелёное яблоко с лёгким холодком, один из лучших миксовых вкусов бренда.' },
+  { name:'Milk Oolong', brand:'Musthave', strength:5, tags:['dessert'], note:'Молочный улун — чайный вкус со сливочно-цветочными нотами линейки Undercoal, спорный в соло, но хорошо раскрывается в миксах.' },
+  { name:'Blueberry', brand:'Musthave', strength:5, tags:['berry','dessert'], note:'Насыщенная черника с мягким йогуртовым оттенком — один из топовых ягодных вкусов бренда.' },
+  { name:'Виноград мята', brand:'Северный Professional', strength:8, tags:['fruity','mint'], note:'Крепкая линейка Северного — сладкий зелёный виноград со свежей мятой, никотина в 1.5 раза больше базовой линейки бренда.' },
+  { name:'Smoky Trip №1 — Лимон, Тоник, Лаванда', brand:'Ready', strength:7, tags:['citrus','floral'], note:'Готовый фирменный микс от бренда Ready (дочерний проект Bonche) — цитрусовый тоник с лавандой, крепость выше средней.' },
 ];
 
 // ---------- Strength word ----------
@@ -1027,6 +1031,16 @@ const MIX_RECIPES = [
   { name:'Дымный табак', tags:['fruity','drink','classic','spice','exotic'], recipe:[{t:'Spectrum Hard Line Grape Soda', p:55, s:8}, {t:'Satyr Месть королевы Анны', p:30, s:9}, {t:'Frigate Caribbean Nights', p:15, s:10}], note:'Дымный табак — это плотный табачный дым старой школы. Hard Line Grape Soda составляет основу (~55%), Месть королевы Анны добавляет табачную плотность (~30%), Caribbean Nights закрывает микс лёгким акцентом (~15%). Крепость ~9/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Тёплый табак', tags:['fruity','dessert','drink','classic','spice'], recipe:[{t:'Black Burn Peach Killer', p:45, s:7}, {t:'Trofimoff\'S Terror Finlandia Vanilla', p:30, s:8}, {t:'Satyr Месть королевы Анны', p:25, s:9}], note:'Тёплый табак — это первые тёплые лучи, которые будят вкус. Peach Killer составляет основу (~45%), Terror Finlandia Vanilla добавляет десертную сладость (~30%), Месть королевы Анны закрывает микс лёгким акцентом (~25%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Домашний пирог', tags:['fruity','dessert'], recipe:[{t:'Musthave Apple Drops', p:45, s:5}, {t:'Black Burn Original Popcorn', p:30, s:6}, {t:'Musthave Cinnamon Rolls', p:25, s:5}], note:'Домашний пирог — это свежая выпечка, только из духовки. Apple Drops составляет основу (~45%), Original Popcorn добавляет десертную сладость (~30%), Cinnamon Rolls закрывает микс лёгким акцентом (~25%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  // ---------- New mixes for freshly-added flavors ----------
+  { name:'Кремовый бриз', tags:['dessert','citrus'], recipe:[{t:'Musthave Milk Oolong', p:60, s:5}, {t:'Darkside Kalee Grapefruit', p:40, s:6}], note:'Кремовый бриз — это лёгкий ветер с цитрусовой нотой. Milk Oolong составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~40%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Лесной джем', tags:['dessert','berry','mint'], recipe:[{t:'Musthave Milk Oolong', p:55, s:5}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Лесной джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Райский остров', tags:['berry','dessert','exotic','fruity','mint'], recipe:[{t:'Musthave Blueberry', p:60, s:5}, {t:'Bonche Passion Fruit', p:30, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Райский остров — это уединённый остров вдали от всех. Blueberry составляет основу (~60%), Passion Fruit добавляет экзотическую нотку (~30%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Ягодный пломбир', tags:['berry','dessert','fruity'], recipe:[{t:'Musthave Blueberry', p:60, s:5}, {t:'Sebero Vanilla', p:40, s:5}], note:'Ягодный пломбир — это тающий пломбир в жаркий полдень. Blueberry составляет основу (~60%), Vanilla добавляет десертную сладость (~40%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сочный вихрь', tags:['dessert','fruity','citrus','mint'], recipe:[{t:'Overdose Fruitella', p:60, s:9}, {t:'Darkside Kalee Grapefruit', p:30, s:6}, {t:'Северный Professional Виноград мята', p:10, s:8}], note:'Сочный вихрь — это холодный вихрь, который сбивает с ног. Fruitella составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~30%), Виноград мята закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Терпкий морс', tags:['citrus','berry','fruity','mint'], recipe:[{t:'Darkside Lemonblast', p:55, s:7}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Северный Professional Виноград мята', p:10, s:8}], note:'Терпкий морс — это домашний ягодный морс со льдом. Lemonblast составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Виноград мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Нежный бриз', tags:['citrus','floral','berry','mint'], recipe:[{t:'Ready Smoky Trip №1 — Лимон, Тоник, Лаванда', p:55, s:7}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Нежный бриз — это лёгкий ветер с цитрусовой нотой. Smoky Trip №1 составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Весенний букет', tags:['citrus','floral','dessert','fruity'], recipe:[{t:'Ready Smoky Trip №1 — Лимон, Тоник, Лаванда', p:60, s:7}, {t:'Bonche Lavender', p:25, s:4}, {t:'Sebero Vanilla', p:15, s:5}], note:'Весенний букет — это собранный вручную цветочный букет. Smoky Trip №1 составляет основу (~60%), Lavender добавляет цветочный шлейф (~25%), Vanilla закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Домашний джем', tags:['dessert','berry','fruity','mint'], recipe:[{t:'Musthave Milk Oolong', p:40, s:5}, {t:'Musthave Blueberry', p:30, s:5}, {t:'Северный Professional Виноград мята', p:10, s:8}, {t:'Sebero Vanilla', p:20, s:5}], note:'Домашний джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~40%), Blueberry добавляет ягодную кислинку (~30%), Виноград мята добавляет фруктовую сочность (~10%), Vanilla закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
 ];
 
 // ---------- Favorites (liked mixes) ----------
@@ -1453,9 +1467,15 @@ photoAnalyzeBtn.addEventListener('click', async ()=>{
       if (items.length > 0) break; // success — no need to keep retrying
     }catch(err){
       lastErrorMsg = err.message;
-      // A hard error (network/service) — still worth retrying, the next
-      // attempt might just work, but no point burning all 5 tries on a
-      // clearly broken connection.
+      // If the service itself says quota/rate limit is exhausted, retrying
+      // won't help — every further attempt would just hit the same wall
+      // and burn through the account's limit for nothing. Stop immediately.
+      const lower = (err.message || '').toLowerCase();
+      if (lower.includes('quota') || lower.includes('limit') || lower.includes('лимит') || lower.includes('too many requests')){
+        break;
+      }
+      // Otherwise it's likely a transient network/service hiccup — still
+      // worth retrying, the next attempt might just work.
     }
   }
 
