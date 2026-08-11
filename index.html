@@ -1456,7 +1456,13 @@ photoFileInput.addEventListener('change', async ()=>{
 });
 
 const PHOTO_MAX_SEARCH_ATTEMPTS = 10; // keep trying until we get at least one hit
-const PHOTO_MERGE_ATTEMPTS = 2;       // once we have a hit, a couple more passes to catch anything the first pass missed (multi-jar photos especially benefit from this)
+const PHOTO_MERGE_ATTEMPTS = 2;       // extra passes to catch anything the first pass missed
+const PHOTO_MERGE_THRESHOLD = 2;      // only bother with merge passes if the first hit found this many items or fewer — a hit that already found several jars is unlikely to gain much from re-asking, so skip the extra token spend
+
+// Caches the result for the exact photo currently loaded, so accidental
+// double-clicks (or re-opening step 2 without changing the photo) don't
+// fire a fresh batch of paid requests for data we already have.
+let photoResultCache = null; // { base64, items }
 
 async function callAnalyzeOnce(){
   const resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
@@ -1489,6 +1495,21 @@ function mergeDetectedItems(lists){
 
 photoAnalyzeBtn.addEventListener('click', async ()=>{
   if (!photoBase64) return;
+
+  // Same photo already analyzed this session — reuse the result instead of
+  // spending more tokens on an identical request.
+  if (photoResultCache && photoResultCache.base64 === photoBase64){
+    photoDetectedItems = photoResultCache.items;
+    if (photoDetectedItems.length === 0){
+      photoStatus.style.display = 'block';
+      photoStatus.textContent = 'Уже проверяли это фото — ничего похожего на табак для кальяна не нашлось. Попробуй фото почётче, светлее или с другого ракурса.';
+      return;
+    }
+    photoStatus.style.display = 'none';
+    showPhotoStep2();
+    return;
+  }
+
   photoStatus.style.display = 'block';
   photoAnalyzeBtn.disabled = true;
 
@@ -1496,6 +1517,7 @@ photoAnalyzeBtn.addEventListener('click', async ()=>{
   let lastErrorMsg = null;
   let gotFirstHit = false;
   let totalAttempts = 0;
+  let firstHitCount = 0;
 
   // Phase 1: keep trying until we get at least one non-empty result.
   for (let attempt = 1; attempt <= PHOTO_MAX_SEARCH_ATTEMPTS; attempt++){
@@ -1509,6 +1531,7 @@ photoAnalyzeBtn.addEventListener('click', async ()=>{
       if (items.length > 0){
         collectedLists.push(items);
         gotFirstHit = true;
+        firstHitCount = items.length;
         break;
       }
     }catch(err){
@@ -1520,9 +1543,10 @@ photoAnalyzeBtn.addEventListener('click', async ()=>{
     }
   }
 
-  // Phase 2: got at least one hit — run a couple more passes and merge, since
-  // a single pass on a photo with several jars often misses one or two.
-  if (gotFirstHit){
+  // Phase 2: only worth re-checking if the first hit was thin (≤2 items) —
+  // a first pass that already found several jars rarely gains much from
+  // asking again, so skip the extra token spend in that case.
+  if (gotFirstHit && firstHitCount <= PHOTO_MERGE_THRESHOLD){
     for (let i = 1; i <= PHOTO_MERGE_ATTEMPTS; i++){
       photoStatus.textContent = `Перепроверяем, не пропустили ли что-то (${i} из ${PHOTO_MERGE_ATTEMPTS})...`;
       try{
@@ -1537,6 +1561,7 @@ photoAnalyzeBtn.addEventListener('click', async ()=>{
 
   photoAnalyzeBtn.disabled = false;
   const items = mergeDetectedItems(collectedLists);
+  photoResultCache = { base64: photoBase64, items };
 
   if (!gotFirstHit && lastErrorMsg){
     photoStatus.textContent = `Не получилось распознать после ${totalAttempts} попыток: ${lastErrorMsg}. Попробуй ещё раз чуть позже.`;
@@ -1577,6 +1602,7 @@ function renderPhotoChips(){
 photoRetryBtn.addEventListener('click', ()=>{
   photoBase64 = null;
   photoDetectedItems = [];
+  photoResultCache = null;
   photoFileInput.value = '';
   photoPreview.style.display = 'none';
   photoAnalyzeBtn.style.display = 'none';
