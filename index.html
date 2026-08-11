@@ -658,10 +658,11 @@ const CATEGORIES = [
   { key:'drink',   label:'Напитки',    icon:'🥤' },
   { key:'exotic',  label:'Экзотика',   icon:'🥭' },
   { key:'classic', label:'Классика',   icon:'🚬' },
+  { key:'tea',     label:'Чайный',     icon:'🍵' },
 ];
 
 const FLAVORS = [
-  { name:'Hard Green Queen', brand:'Хулиган', strength:8, tags:['mint','classic'], note:'Зелёный чай с мёдом и марокканской мятой на крепкой линейке Hard.' },
+  { name:'Hard Green Queen', brand:'Хулиган', strength:8, tags:['mint','classic','tea'], note:'Зелёный чай с мёдом и марокканской мятой на крепкой линейке Hard.' },
   { name:'Ванильный крем', brand:'Musthave', strength:6, tags:['dessert'], note:'Сливочно-ванильный десерт средней крепости — плотный и уютный вкус.' },
   { name:'Kalee Grapefruit', brand:'Darkside', strength:6, tags:['citrus'], note:'Кисло-сладкий грейпфрут с терпким послевкусием на линейке Core.' },
   { name:'Dark Mint', brand:'Darkside', strength:5, tags:['mint'], note:'Перечная мята — чистый холодок без цитрусовых добавок.' },
@@ -752,10 +753,17 @@ const FLAVORS = [
   { name:'Cinnamon Rolls', brand:'Musthave', strength:5, tags:['dessert'], note:'Сладкая булочка с корицей и глазурью — насыщенный выпечечный десерт, по отзывам довольно интенсивный.' },
   { name:'Original Popcorn', brand:'Black Burn', strength:6, tags:['dessert'], note:'Сладко-масляный попкорн — один из фирменных «кукурузных» вкусов бренда.' },
   { name:'Apple Drops', brand:'Musthave', strength:5, tags:['fruity','dessert'], note:'Сочные яблочные леденцы без аниса — сладко-кислое зелёное яблоко с лёгким холодком, один из лучших миксовых вкусов бренда.' },
-  { name:'Milk Oolong', brand:'Musthave', strength:5, tags:['dessert'], note:'Молочный улун — чайный вкус со сливочно-цветочными нотами линейки Undercoal, спорный в соло, но хорошо раскрывается в миксах.' },
+  { name:'Milk Oolong', brand:'Musthave', strength:5, tags:['dessert','tea'], note:'Молочный улун — чайный вкус со сливочно-цветочными нотами линейки Undercoal, спорный в соло, но хорошо раскрывается в миксах.' },
   { name:'Blueberry', brand:'Musthave', strength:5, tags:['berry','dessert'], note:'Насыщенная черника с мягким йогуртовым оттенком — один из топовых ягодных вкусов бренда.' },
   { name:'Виноград мята', brand:'Северный Professional', strength:8, tags:['fruity','mint'], note:'Крепкая линейка Северного — сладкий зелёный виноград со свежей мятой, никотина в 1.5 раза больше базовой линейки бренда.' },
   { name:'Smoky Trip №1 — Лимон, Тоник, Лаванда', brand:'Ready', strength:7, tags:['citrus','floral'], note:'Готовый фирменный микс от бренда Ready (дочерний проект Bonche) — цитрусовый тоник с лавандой, крепость выше средней.' },
+  { name:'Белый чай', brand:'Северный', strength:7, tags:['dessert','tea'], note:'Благородный китайский императорский белый чай с нотами спелых фруктов и кураги — крепость выше средней даже для Северного.' },
+  { name:'HiT — Grape Rave (Виноград, Земляника, Арбуз)', brand:'Black Burn', strength:6, tags:['fruity','berry'], note:'Сочная тройка из линейки HiT — виноград, земляника и арбуз, крепость средняя.' },
+  { name:'HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника)', brand:'Black Burn', strength:5, tags:['dessert','berry'], note:'Воздушный сладкий маршмеллоу со спелой клубникой и земляникой — крепость чуть ниже средней.' },
+  { name:'Grapple', brand:'Overdose', strength:8, tags:['fruity','citrus'], note:'Яркий насыщенный виноградно-цитрусовый вкус — хорош и в соло, и как база для миксов.' },
+  { name:'Maraschino Cherry', brand:'Overdose', strength:8, tags:['berry','dessert'], note:'Коктейльная вишня с миндальными нотками и терпкой косточкой — популярный десертно-ягодный вкус бренда.' },
+  { name:'На Чиле (feat. Джиган)', brand:'Black Burn', strength:7, tags:['exotic','fruity'], note:'Коллаборационный вкус с рэпером Джиганом — насыщенный тропический сок из спелого ананаса и маракуйи, крепость 7/10.' },
+  { name:'Gooseberry Shock', brand:'Black Burn', strength:7, tags:['berry'], note:'Кислый крыжовник из линейки Shock — самый кислый табак на рынке по заявлению бренда, высокая крепость.' },
 ];
 
 // ---------- Strength word ----------
@@ -895,8 +903,7 @@ function findMatches(){
 
 // ---------- Curated combo recipes (invented by Claude, based on general mixology principles found online) ----------
 // Ratio convention: base ~50-60%, secondary ~25-35%, accent ~10-15% (mint/ice/spice topping)
-const MIX_RECIPES = [
-  { name:'Сладкий бриз', tags:['citrus','dessert','mint'], recipe:[{t:'Sebero Lemon Candy', p:90, s:4}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Сладкий бриз — это лёгкий ветер с цитрусовой нотой. Lemon Candy составляет основу (~90%), Ice Mint добавляет лёгкий холодок (~10%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+const MIX_RECIPES = [  { name:'Сладкий бриз', tags:['citrus','dessert','mint'], recipe:[{t:'Sebero Lemon Candy', p:90, s:4}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Сладкий бриз — это лёгкий ветер с цитрусовой нотой. Lemon Candy составляет основу (~90%), Ice Mint добавляет лёгкий холодок (~10%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Спелый фреш', tags:['berry','fruity','mint'], recipe:[{t:'Duft Cherry Juice', p:90, s:5}, {t:'Black Burn Kiwi Stoner', p:10, s:6}], note:'Спелый фреш — это свежевыжатый сок в самом начале дня. Cherry Juice составляет основу (~90%), Kiwi Stoner добавляет фруктовую сочность (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Спелый крем', tags:['fruity','dessert','drink','citrus'], recipe:[{t:'Adalya Love 66', p:90, s:5}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Спелый крем — это нежный крем, который тает на языке. Love 66 составляет основу (~90%), Огонь — Margarita добавляет напиточный характер (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Садовый фреш', tags:['fruity','dessert','drink'], recipe:[{t:'Adalya Love 66', p:90, s:5}, {t:'Spectrum Hard Line Grape Soda', p:10, s:8}], note:'Садовый фреш — это свежевыжатый сок в самом начале дня. Love 66 составляет основу (~90%), Hard Line Grape Soda добавляет фруктовую сочность (~10%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
@@ -936,14 +943,14 @@ const MIX_RECIPES = [
   { name:'Сочный пломбир', tags:['berry','dessert','exotic'], recipe:[{t:'Starline Клубничный мильфей', p:50, s:4}, {t:'Daily Hookah Личи-малина', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сочный пломбир — это тающий пломбир в жаркий полдень. Клубничный мильфей составляет основу (~50%), Личи-малина добавляет экзотическую нотку (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Уютный десерт', tags:['exotic','berry'], recipe:[{t:'Daily Hookah Личи-малина', p:60, s:5}, {t:'Trofimoff\'S Hurtleberry', p:25, s:7}, {t:'Musthave Raspberry', p:15, s:5}], note:'Уютный десерт — это десертный стол в конце ужина. Личи-малина составляет основу (~60%), Hurtleberry добавляет ягодную кислинку (~25%), Raspberry закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Спелый джем', tags:['berry','fruity','exotic'], recipe:[{t:'Duft Cherry Juice', p:55, s:5}, {t:'Daily Hookah Личи-малина', p:25, s:5}, {t:'Musthave Raspberry', p:20, s:5}], note:'Спелый джем — это густой ягодный джем на подаче. Cherry Juice составляет основу (~55%), Личи-малина добавляет экзотическую нотку (~25%), Raspberry закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
-  { name:'Дымный вечер', tags:['drink','citrus','classic','mint'], recipe:[{t:'Duft Aperol Spritz', p:55, s:6}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Дымный вечер — это поздний вечер в компании старых друзей. Aperol Spritz составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Спелый морс', tags:['drink','classic','berry','mint'], recipe:[{t:'Jent Brisky Whiskey', p:55, s:6}, {t:'Deus Blackberry Wine', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Спелый морс — это домашний ягодный морс со льдом. Brisky Whiskey составляет основу (~55%), Blackberry Wine добавляет ягодную кислинку (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Игристый коктейль', tags:['drink','classic','exotic','mint'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Sebero Thai', p:30, s:5}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Игристый коктейль — это вечер в баре за неспешным коктейлем. Brisky Whiskey составляет основу (~60%), Thai добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Уютная легенда', tags:['dessert','drink','classic','mint'], recipe:[{t:'Darkside C.R.E.A.M. S.O.D.A.', p:65, s:6}, {t:'Jent Brisky Whiskey', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Уютная легенда — это вкус, который давно стал легендой кальянных. C.R.E.A.M. S.O.D.A. составляет основу (~65%), Brisky Whiskey добавляет напиточный характер (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Вечерний шейк', tags:['drink','classic','mint'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Deus Guinness', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Вечерний шейк — это взболтанный барменом шейк. Brisky Whiskey составляет основу (~60%), Guinness добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Дымная легенда', tags:['drink','classic','mint'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Darkside Cosmos', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Дымная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~60%), Cosmos добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Плотная легенда', tags:['drink','classic','berry','dessert','mint'], recipe:[{t:'Jent Brisky Whiskey', p:65, s:6}, {t:'Spectrum Dezzert Cherry', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Плотная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~65%), Dezzert Cherry добавляет ягодную кислинку (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Барный вечер', tags:['drink','classic','fruity','mint'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Spectrum Grape Soda', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Барный вечер — это поздний вечер в компании старых друзей. Brisky Whiskey составляет основу (~60%), Grape Soda добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Дымный вечер', tags:['drink','citrus','classic','mint','tea'], recipe:[{t:'Duft Aperol Spritz', p:55, s:6}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Дымный вечер — это поздний вечер в компании старых друзей. Aperol Spritz составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелый морс', tags:['drink','classic','berry','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:55, s:6}, {t:'Deus Blackberry Wine', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Спелый морс — это домашний ягодный морс со льдом. Brisky Whiskey составляет основу (~55%), Blackberry Wine добавляет ягодную кислинку (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Игристый коктейль', tags:['drink','classic','exotic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Sebero Thai', p:30, s:5}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Игристый коктейль — это вечер в баре за неспешным коктейлем. Brisky Whiskey составляет основу (~60%), Thai добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Уютная легенда', tags:['dessert','drink','classic','mint','tea'], recipe:[{t:'Darkside C.R.E.A.M. S.O.D.A.', p:65, s:6}, {t:'Jent Brisky Whiskey', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Уютная легенда — это вкус, который давно стал легендой кальянных. C.R.E.A.M. S.O.D.A. составляет основу (~65%), Brisky Whiskey добавляет напиточный характер (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Вечерний шейк', tags:['drink','classic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Deus Guinness', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Вечерний шейк — это взболтанный барменом шейк. Brisky Whiskey составляет основу (~60%), Guinness добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Дымная легенда', tags:['drink','classic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Darkside Cosmos', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Дымная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~60%), Cosmos добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Плотная легенда', tags:['drink','classic','berry','dessert','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:65, s:6}, {t:'Spectrum Dezzert Cherry', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Плотная легенда — это вкус, который давно стал легендой кальянных. Brisky Whiskey составляет основу (~65%), Dezzert Cherry добавляет ягодную кислинку (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Барный вечер', tags:['drink','classic','fruity','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Spectrum Grape Soda', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Барный вечер — это поздний вечер в компании старых друзей. Brisky Whiskey составляет основу (~60%), Grape Soda добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Кислый бриз', tags:['drink','citrus','mint'], recipe:[{t:'Duft Aperol Spritz', p:65, s:6}, {t:'Black Burn Lemon Shock', p:25, s:6}, {t:'Darkside Dark Mint', p:10, s:5}], note:'Кислый бриз — это лёгкий ветер с цитрусовой нотой. Aperol Spritz составляет основу (~65%), Lemon Shock добавляет цитрусовую терпкость (~25%), Dark Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Домашний десерт', tags:['fruity','dessert'], recipe:[{t:'Black Burn Peach Killer', p:50, s:7}, {t:'Nаш Чупа чупс', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Домашний десерт — это десертный стол в конце ужина. Peach Killer составляет основу (~50%), Чупа чупс добавляет десертную сладость (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сочный ягодник', tags:['exotic','dessert','berry'], recipe:[{t:'WTO Skywalker', p:60, s:6}, {t:'Starline Клубничный мильфей', p:25, s:4}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сочный ягодник — это сбор ягод прямо с куста. Skywalker составляет основу (~60%), Клубничный мильфей добавляет ягодную кислинку (~25%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -967,7 +974,7 @@ const MIX_RECIPES = [
   { name:'Сладкий остров', tags:['exotic','dessert','fruity'], recipe:[{t:'WTO Skywalker', p:55, s:6}, {t:'Overdose Fruitella', p:30, s:9}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Сладкий остров — это уединённый остров вдали от всех. Skywalker составляет основу (~55%), Fruitella добавляет десертную сладость (~30%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Цитрусовый шейк', tags:['drink','citrus'], recipe:[{t:'Duft Aperol Spritz', p:55, s:6}, {t:'Darkside Lemonblast', p:30, s:7}, {t:'Darkside Kalee Grapefruit', p:15, s:6}], note:'Цитрусовый шейк — это взболтанный барменом шейк. Aperol Spritz составляет основу (~55%), Lemonblast добавляет цитрусовую терпкость (~30%), Kalee Grapefruit закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Спелый пломбир', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:55, s:9}, {t:'Nаш Чупа чупс', p:35, s:5}, {t:'Chabacco Medium Juicy Peach', p:10, s:5}], note:'Спелый пломбир — это тающий пломбир в жаркий полдень. Fruitella составляет основу (~55%), Чупа чупс добавляет десертную сладость (~35%), Medium Juicy Peach закрывает микс лёгким акцентом (~10%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Классический коктейль', tags:['classic','drink','mint'], recipe:[{t:'Satyr 1915', p:55, s:8}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Классический коктейль — это вечер в баре за неспешным коктейлем. 1915 составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Классический коктейль', tags:['classic','drink','mint','tea'], recipe:[{t:'Satyr 1915', p:55, s:8}, {t:'Jent Brisky Whiskey', p:35, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Классический коктейль — это вечер в баре за неспешным коктейлем. 1915 составляет основу (~55%), Brisky Whiskey добавляет напиточный характер (~35%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сочный крем', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:55, s:9}, {t:'Северный Кучерявый персик', p:35, s:5}, {t:'Chabacco Medium Juicy Peach', p:10, s:5}], note:'Сочный крем — это нежный крем, который тает на языке. Fruitella составляет основу (~55%), Кучерявый персик добавляет фруктовую сочность (~35%), Medium Juicy Peach закрывает микс лёгким акцентом (~10%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Домашний пломбир', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:50, s:9}, {t:'Северный Кучерявый персик', p:35, s:5}, {t:'Musthave Ванильный крем', p:15, s:6}], note:'Домашний пломбир — это тающий пломбир в жаркий полдень. Fruitella составляет основу (~50%), Кучерявый персик добавляет фруктовую сочность (~35%), Ванильный крем закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Жгучая пряность', tags:['citrus','mint'], recipe:[{t:'Darkside Lemonblast', p:55, s:7}, {t:'Sarma 360 Помело-грейпфрут', p:35, s:5}, {t:'Darkside Dark Mint', p:10, s:5}], note:'Жгучая пряность — это восточная пряность, добавленная в конце. Lemonblast составляет основу (~55%), 360 Помело-грейпфрут добавляет цитрусовую терпкость (~35%), Dark Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -985,7 +992,7 @@ const MIX_RECIPES = [
   { name:'Уютный сад', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:75, s:9}, {t:'Starline Виноградное желе', p:15, s:4}, {t:'Chabacco Medium Juicy Peach', p:10, s:5}], note:'Уютный сад — это прогулка по фруктовому саду в жаркий день. Fruitella составляет основу (~75%), Виноградное желе добавляет фруктовую сочность (~15%), Medium Juicy Peach закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Сладкий крем', tags:['dessert','fruity','berry'], recipe:[{t:'Overdose Fruitella', p:75, s:9}, {t:'Sarma Клубника со сливками', p:15, s:4}, {t:'Chabacco Medium Juicy Peach', p:10, s:5}], note:'Сладкий крем — это нежный крем, который тает на языке. Fruitella составляет основу (~75%), Клубника со сливками добавляет ягодную кислинку (~15%), Medium Juicy Peach закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Кремовый фреш', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:60, s:9}, {t:'Musthave Ванильный крем', p:30, s:6}, {t:'Chabacco Medium Juicy Peach', p:10, s:5}], note:'Кремовый фреш — это свежевыжатый сок в самом начале дня. Fruitella составляет основу (~60%), Ванильный крем добавляет десертную сладость (~30%), Medium Juicy Peach закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
-  { name:'Коктейльный табак', tags:['drink','berry','classic','mint'], recipe:[{t:'Chabacco Strong Cherry Cola', p:70, s:7}, {t:'Jent Brisky Whiskey', p:20, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Коктейльный табак — это плотный табачный дым старой школы. Strong Cherry Cola составляет основу (~70%), Brisky Whiskey добавляет напиточный характер (~20%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Коктейльный табак', tags:['drink','berry','classic','mint','tea'], recipe:[{t:'Chabacco Strong Cherry Cola', p:70, s:7}, {t:'Jent Brisky Whiskey', p:20, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Коктейльный табак — это плотный табачный дым старой школы. Strong Cherry Cola составляет основу (~70%), Brisky Whiskey добавляет напиточный характер (~20%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Терпкий всплеск', tags:['citrus','berry','spice'], recipe:[{t:'Darkside Lemonblast', p:80, s:7}, {t:'Sebero Herbal-Currant', p:10, s:6}, {t:'Darkside Kalee Grapefruit', p:10, s:6}], note:'Терпкий всплеск — это резкий, яркий всплеск на вдохе. Lemonblast составляет основу (~80%), Herbal-Currant добавляет ягодную кислинку (~10%), Kalee Grapefruit закрывает микс лёгким акцентом (~10%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Домашний крем', tags:['citrus','exotic','dessert'], recipe:[{t:'Black Burn Lemon Shock', p:75, s:6}, {t:'WTO Skywalker', p:15, s:6}, {t:'Musthave Ванильный крем', p:10, s:6}], note:'Домашний крем — это нежный крем, который тает на языке. Lemon Shock составляет основу (~75%), Skywalker добавляет экзотическую нотку (~15%), Ванильный крем закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сладкий сад', tags:['dessert','fruity'], recipe:[{t:'Overdose Fruitella', p:70, s:9}, {t:'Adalya Swiss Bonbon', p:20, s:4}, {t:'Musthave Ванильный крем', p:10, s:6}], note:'Сладкий сад — это прогулка по фруктовому саду в жаркий день. Fruitella составляет основу (~70%), Swiss Bonbon добавляет десертную сладость (~20%), Ванильный крем закрывает микс лёгким акцентом (~10%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
@@ -1032,15 +1039,25 @@ const MIX_RECIPES = [
   { name:'Тёплый табак', tags:['fruity','dessert','drink','classic','spice'], recipe:[{t:'Black Burn Peach Killer', p:45, s:7}, {t:'Trofimoff\'S Terror Finlandia Vanilla', p:30, s:8}, {t:'Satyr Месть королевы Анны', p:25, s:9}], note:'Тёплый табак — это первые тёплые лучи, которые будят вкус. Peach Killer составляет основу (~45%), Terror Finlandia Vanilla добавляет десертную сладость (~30%), Месть королевы Анны закрывает микс лёгким акцентом (~25%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Домашний пирог', tags:['fruity','dessert'], recipe:[{t:'Musthave Apple Drops', p:45, s:5}, {t:'Black Burn Original Popcorn', p:30, s:6}, {t:'Musthave Cinnamon Rolls', p:25, s:5}], note:'Домашний пирог — это свежая выпечка, только из духовки. Apple Drops составляет основу (~45%), Original Popcorn добавляет десертную сладость (~30%), Cinnamon Rolls закрывает микс лёгким акцентом (~25%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   // ---------- New mixes for freshly-added flavors ----------
-  { name:'Кремовый бриз', tags:['dessert','citrus'], recipe:[{t:'Musthave Milk Oolong', p:60, s:5}, {t:'Darkside Kalee Grapefruit', p:40, s:6}], note:'Кремовый бриз — это лёгкий ветер с цитрусовой нотой. Milk Oolong составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~40%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
-  { name:'Лесной джем', tags:['dessert','berry','mint'], recipe:[{t:'Musthave Milk Oolong', p:55, s:5}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Лесной джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Кремовый бриз', tags:['dessert','citrus','tea'], recipe:[{t:'Musthave Milk Oolong', p:60, s:5}, {t:'Darkside Kalee Grapefruit', p:40, s:6}], note:'Кремовый бриз — это лёгкий ветер с цитрусовой нотой. Milk Oolong составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~40%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Лесной джем', tags:['dessert','berry','mint','tea'], recipe:[{t:'Musthave Milk Oolong', p:55, s:5}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Лесной джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Райский остров', tags:['berry','dessert','exotic','fruity','mint'], recipe:[{t:'Musthave Blueberry', p:60, s:5}, {t:'Bonche Passion Fruit', p:30, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Райский остров — это уединённый остров вдали от всех. Blueberry составляет основу (~60%), Passion Fruit добавляет экзотическую нотку (~30%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Ягодный пломбир', tags:['berry','dessert','fruity'], recipe:[{t:'Musthave Blueberry', p:60, s:5}, {t:'Sebero Vanilla', p:40, s:5}], note:'Ягодный пломбир — это тающий пломбир в жаркий полдень. Blueberry составляет основу (~60%), Vanilla добавляет десертную сладость (~40%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Сочный вихрь', tags:['dessert','fruity','citrus','mint'], recipe:[{t:'Overdose Fruitella', p:60, s:9}, {t:'Darkside Kalee Grapefruit', p:30, s:6}, {t:'Северный Professional Виноград мята', p:10, s:8}], note:'Сочный вихрь — это холодный вихрь, который сбивает с ног. Fruitella составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~30%), Виноград мята закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Терпкий морс', tags:['citrus','berry','fruity','mint'], recipe:[{t:'Darkside Lemonblast', p:55, s:7}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Северный Professional Виноград мята', p:10, s:8}], note:'Терпкий морс — это домашний ягодный морс со льдом. Lemonblast составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Виноград мята закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Нежный бриз', tags:['citrus','floral','berry','mint'], recipe:[{t:'Ready Smoky Trip №1 — Лимон, Тоник, Лаванда', p:55, s:7}, {t:'Musthave Raspberry', p:35, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Нежный бриз — это лёгкий ветер с цитрусовой нотой. Smoky Trip №1 составляет основу (~55%), Raspberry добавляет ягодную кислинку (~35%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Весенний букет', tags:['citrus','floral','dessert','fruity'], recipe:[{t:'Ready Smoky Trip №1 — Лимон, Тоник, Лаванда', p:60, s:7}, {t:'Bonche Lavender', p:25, s:4}, {t:'Sebero Vanilla', p:15, s:5}], note:'Весенний букет — это собранный вручную цветочный букет. Smoky Trip №1 составляет основу (~60%), Lavender добавляет цветочный шлейф (~25%), Vanilla закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Домашний джем', tags:['dessert','berry','fruity','mint'], recipe:[{t:'Musthave Milk Oolong', p:40, s:5}, {t:'Musthave Blueberry', p:30, s:5}, {t:'Северный Professional Виноград мята', p:10, s:8}, {t:'Sebero Vanilla', p:20, s:5}], note:'Домашний джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~40%), Blueberry добавляет ягодную кислинку (~30%), Виноград мята добавляет фруктовую сочность (~10%), Vanilla закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Домашний джем', tags:['dessert','berry','fruity','mint','tea'], recipe:[{t:'Musthave Milk Oolong', p:40, s:5}, {t:'Musthave Blueberry', p:30, s:5}, {t:'Северный Professional Виноград мята', p:10, s:8}, {t:'Sebero Vanilla', p:20, s:5}], note:'Домашний джем — это густой ягодный джем на подаче. Milk Oolong составляет основу (~40%), Blueberry добавляет ягодную кислинку (~30%), Виноград мята добавляет фруктовую сочность (~10%), Vanilla закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  // ---------- New mixes for verified flavors (Северный, Black Burn, Overdose) ----------
+  { name:'Уютный чай', tags:['dessert','fruity','tea'], recipe:[{t:'Северный Белый чай', p:55, s:7}, {t:'Musthave Apple Drops', p:30, s:5}, {t:'Sebero Vanilla', p:15, s:5}], note:'Уютный чай — это чаепитие в тихий будний вечер. Белый чай составляет основу (~55%), Apple Drops добавляет фруктовую сочность (~30%), Vanilla закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Тёплый чай', tags:['dessert','floral','tea'], recipe:[{t:'Северный Белый чай', p:50, s:7}, {t:'Trofimoff\'S The Rose', p:35, s:6}, {t:'Bonche Lavender', p:15, s:4}], note:'Тёплый чай — это чаепитие в тихий будний вечер. Белый чай составляет основу (~50%), The Rose добавляет цветочный шлейф (~35%), Lavender закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Спелая россыпь', tags:['fruity','berry','mint'], recipe:[{t:'Black Burn HiT — Grape Rave (Виноград, Земляника, Арбуз)', p:60, s:6}, {t:'Musthave Raspberry', p:30, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Спелая россыпь — это россыпь спелых ягод в горсти. Grape Rave составляет основу (~60%), Raspberry добавляет ягодную кислинку (~30%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кислый заряд', tags:['fruity','berry','mint'], recipe:[{t:'Black Burn HiT — Grape Rave (Виноград, Земляника, Арбуз)', p:55, s:6}, {t:'Black Burn Gooseberry Shock', p:35, s:7}, {t:'Darkside Dark Mint', p:10, s:5}], note:'Кислый заряд — это бодрящий заряд с кислинкой. Grape Rave составляет основу (~55%), Gooseberry Shock добавляет ягодную кислинку (~35%), Dark Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Воздушный маршмеллоу', tags:['dessert','berry','mint'], recipe:[{t:'Black Burn HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника)', p:60, s:5}, {t:'Musthave Blueberry', p:30, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Воздушный маршмеллоу — это воздушная сладость прямо изо рта в рот. DJ Marshmallow составляет основу (~60%), Blueberry добавляет ягодную кислинку (~30%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Терпкий вихрь', tags:['fruity','citrus','mint'], recipe:[{t:'Overdose Grapple', p:60, s:8}, {t:'Darkside Kalee Grapefruit', p:30, s:6}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Терпкий вихрь — это холодный вихрь, который сбивает с ног. Grapple составляет основу (~60%), Kalee Grapefruit добавляет цитрусовую терпкость (~30%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Сочный лёд', tags:['berry','dessert','drink','mint'], recipe:[{t:'Overdose Maraschino Cherry', p:55, s:8}, {t:'Trofimoff\'S Terror Finlandia Vanilla', p:35, s:8}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Сочный лёд — это ледяная корка, которая тает на языке. Maraschino Cherry составляет основу (~55%), Terror Finlandia Vanilla добавляет десертную сладость (~35%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Тропический вихрь', tags:['exotic','fruity','mint'], recipe:[{t:'Black Burn На Чиле (feat. Джиган)', p:60, s:7}, {t:'Bonche Passion Fruit', p:30, s:5}, {t:'Frigate Arctic Monkey', p:10, s:10}], note:'Тропический вихрь — это холодный вихрь, который сбивает с ног. На Чиле составляет основу (~60%), Passion Fruit добавляет экзотическую нотку (~30%), Arctic Monkey закрывает микс лёгким холодком, не больше 10%. Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Кислый морс', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Black Burn Gooseberry Shock', p:55, s:7}, {t:'Sebero Vanilla', p:35, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Кислый морс — это домашний ягодный морс со льдом. Gooseberry Shock составляет основу (~55%), Vanilla добавляет десертную сладость (~35%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
 ];
 
 // ---------- Favorites (liked mixes) ----------
@@ -1365,7 +1382,7 @@ function resizeToJpeg(blobOrFile){
     const url = URL.createObjectURL(blobOrFile);
     const img = new Image();
     img.onload = ()=>{
-      const MAX_DIM = 1600;
+      const MAX_DIM = 2000;
       let { width, height } = img;
       if (width > MAX_DIM || height > MAX_DIM){
         const scale = MAX_DIM / Math.max(width, height);
@@ -1434,7 +1451,8 @@ photoFileInput.addEventListener('change', async ()=>{
   }
 });
 
-const PHOTO_MAX_ATTEMPTS = 10;
+const PHOTO_MAX_SEARCH_ATTEMPTS = 10; // keep trying until we get at least one hit
+const PHOTO_MERGE_ATTEMPTS = 2;       // once we have a hit, a couple more passes to catch anything the first pass missed (multi-jar photos especially benefit from this)
 
 async function callAnalyzeOnce(){
   const resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
@@ -1449,46 +1467,81 @@ async function callAnalyzeOnce(){
   return Array.isArray(data.items) ? data.items : [];
 }
 
+// Merges item lists from multiple passes, de-duplicating case/whitespace
+// variants of the same string so the same jar isn't listed twice just
+// because two passes phrased it slightly differently.
+function mergeDetectedItems(lists){
+  const norm = s => s.toLowerCase().trim().replace(/\s+/g, ' ');
+  const seen = new Set();
+  const merged = [];
+  lists.flat().forEach(item=>{
+    const key = norm(item);
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  });
+  return merged;
+}
+
 photoAnalyzeBtn.addEventListener('click', async ()=>{
   if (!photoBase64) return;
   photoStatus.style.display = 'block';
   photoAnalyzeBtn.disabled = true;
 
-  let items = [];
+  const collectedLists = [];
   let lastErrorMsg = null;
+  let gotFirstHit = false;
+  let totalAttempts = 0;
 
-  for (let attempt = 1; attempt <= PHOTO_MAX_ATTEMPTS; attempt++){
+  // Phase 1: keep trying until we get at least one non-empty result.
+  for (let attempt = 1; attempt <= PHOTO_MAX_SEARCH_ATTEMPTS; attempt++){
+    totalAttempts++;
     photoStatus.textContent = attempt === 1
       ? 'Анализируем фото — обычно занимает 5-15 секунд...'
-      : `Не получилось с первого раза, пробуем ещё (попытка ${attempt} из ${PHOTO_MAX_ATTEMPTS})...`;
+      : `Не получилось с первого раза, пробуем ещё (попытка ${attempt} из ${PHOTO_MAX_SEARCH_ATTEMPTS})...`;
     try{
-      items = await callAnalyzeOnce();
+      const items = await callAnalyzeOnce();
       lastErrorMsg = null;
-      if (items.length > 0) break; // success — no need to keep retrying
-    }catch(err){
-      lastErrorMsg = err.message;
-      // If the service itself says quota/rate limit is exhausted, retrying
-      // won't help — every further attempt would just hit the same wall
-      // and burn through the account's limit for nothing. Stop immediately.
-      const lower = (err.message || '').toLowerCase();
-      if (lower.includes('quota') || lower.includes('limit') || lower.includes('лимит') || lower.includes('too many requests')){
+      if (items.length > 0){
+        collectedLists.push(items);
+        gotFirstHit = true;
         break;
       }
-      // Otherwise it's likely a transient network/service hiccup — still
-      // worth retrying, the next attempt might just work.
+    }catch(err){
+      lastErrorMsg = err.message;
+      const lower = (err.message || '').toLowerCase();
+      if (lower.includes('quota') || lower.includes('limit') || lower.includes('лимит') || lower.includes('too many requests')){
+        break; // hard wall — no point retrying
+      }
+    }
+  }
+
+  // Phase 2: got at least one hit — run a couple more passes and merge, since
+  // a single pass on a photo with several jars often misses one or two.
+  if (gotFirstHit){
+    for (let i = 1; i <= PHOTO_MERGE_ATTEMPTS; i++){
+      photoStatus.textContent = `Перепроверяем, не пропустили ли что-то (${i} из ${PHOTO_MERGE_ATTEMPTS})...`;
+      try{
+        const items = await callAnalyzeOnce();
+        if (items.length > 0) collectedLists.push(items);
+      }catch(err){
+        // Non-critical at this stage — we already have at least one good
+        // result, so a failed merge-pass just means we keep what we have.
+      }
     }
   }
 
   photoAnalyzeBtn.disabled = false;
+  const items = mergeDetectedItems(collectedLists);
 
-  if (lastErrorMsg && items.length === 0){
-    photoStatus.textContent = `Не получилось распознать после ${PHOTO_MAX_ATTEMPTS} попыток: ${lastErrorMsg}. Попробуй ещё раз чуть позже.`;
+  if (!gotFirstHit && lastErrorMsg){
+    photoStatus.textContent = `Не получилось распознать после ${totalAttempts} попыток: ${lastErrorMsg}. Попробуй ещё раз чуть позже.`;
     return;
   }
 
   photoDetectedItems = items;
   if (photoDetectedItems.length === 0){
-    photoStatus.textContent = `Проверили фото ${PHOTO_MAX_ATTEMPTS} раз — ничего похожего на табак для кальяна не нашлось. Попробуй фото почётче, светлее или с другого ракурса.`;
+    photoStatus.textContent = `Проверили фото ${totalAttempts} раз — ничего похожего на табак для кальяна не нашлось. Попробуй фото почётче, светлее или с другого ракурса.`;
     return;
   }
 
