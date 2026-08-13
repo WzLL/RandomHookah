@@ -1616,8 +1616,20 @@ photoRetryBtn.addEventListener('click', ()=>{
 // Matches a detected "Бренд — Вкус" string against the FLAVORS catalog.
 // Pass 1: both brand and flavor name appear in the string (strict).
 // Pass 2: just a distinctive flavor name appears (looser fallback).
+// Splits a string into meaningful word tokens for fuzzy comparison —
+// strips punctuation/parentheses/quotes, drops 1-character fragments.
+function tokenize(s){
+  return s.toLowerCase()
+    .replace(/["«»'?()]/g, ' ')
+    .split(/[\s,.\-–—]+/)
+    .filter(w => w.length >= 2);
+}
+
 function matchDetectedToFlavor(detectedStr){
-  const norm = s => s.toLowerCase().replace(/[«»"'?]/g,'').trim();
+  // Strip whitespace and dash variants entirely (not just collapse) so
+  // "Black Burn" / "Blackburn" / "Black-Burn" all normalize to the same
+  // string, and an em-dash vs hyphen doesn't break a match either.
+  const norm = s => s.toLowerCase().replace(/[«»"'?]/g,'').replace(/[\s\-–—]+/g,'').trim();
   const d = norm(detectedStr);
   for (const f of FLAVORS){
     if (d.includes(norm(f.brand)) && d.includes(norm(f.name))){
@@ -1630,6 +1642,37 @@ function matchDetectedToFlavor(detectedStr){
       return f;
     }
   }
+
+  // Fuzzy fallback: the vision model sometimes reads the brand and part of
+  // the flavor name correctly but drops a chunk (e.g. skips "(feat. Джиган)"
+  // or misses a sub-name like "Grape Rave"). Instead of requiring the whole
+  // stored name as one substring, score by how many of its meaningful words
+  // actually showed up — brand match is still required first, so this can't
+  // match a completely different brand's flavor.
+  const detectedTokens = new Set(tokenize(detectedStr));
+  let best = null;
+  let bestScore = 0;
+  for (const f of FLAVORS){
+    const brandTokens = tokenize(f.brand);
+    const brandPresent = d.includes(norm(f.brand)) || (brandTokens.length > 0 && brandTokens.every(bt => detectedTokens.has(bt)));
+    if (!brandPresent) continue;
+
+    const nameTokens = tokenize(f.name).filter(t => !brandTokens.includes(t));
+    if (nameTokens.length === 0) continue;
+    const matchedCount = nameTokens.filter(t => detectedTokens.has(t)).length;
+    const score = matchedCount / nameTokens.length;
+    if (score > bestScore){
+      bestScore = score;
+      best = f;
+    }
+  }
+  // Require at least half of the flavor's meaningful words to be present —
+  // enough to survive a dropped sub-name or bracketed credit, but not so
+  // loose that two unrelated flavors from the same brand get confused.
+  if (best && bestScore >= 0.5){
+    return best;
+  }
+
   return null;
 }
 
