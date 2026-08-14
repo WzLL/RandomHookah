@@ -19,9 +19,26 @@
     --brass: #C9A227;
     --line: #3C332A;
     --good: #8FAE6E;
+    --note-text: #C9BFAF;
   }
 
   *{ box-sizing:border-box; }
+
+  /* Consistent keyboard-focus ring in the app's own palette — without this,
+     browsers fall back to a default outline (usually blue) that clashes
+     with the dark ember theme. :focus-visible only shows it for keyboard
+     navigation, not for mouse/touch clicks. */
+  .chip:focus-visible,
+  .tab:focus-visible,
+  .like-btn:focus-visible,
+  .chip-remove:focus-visible,
+  .photo-upload-zone:focus-visible,
+  .cta:focus-visible,
+  .reshuffle-btn:focus-visible,
+  input[type=range]:focus-visible{
+    outline: 2px solid var(--ember);
+    outline-offset: 2px;
+  }
 
   html,body{
     margin:0; padding:0;
@@ -397,7 +414,7 @@
   }
   .card-note{
     font-size: 13px;
-    color: #C9BFAF;
+    color: var(--note-text);
     line-height:1.5;
     margin: 0;
   }
@@ -410,7 +427,6 @@
     line-height:1.6;
   }
 
-  /* ---- Community mix list (shared styles reused by curated recipe cards) ---- */
   /* ---- Shared card styles (used by curated recipe cards) ---- */
   .source-note{
     font-size: 12px;
@@ -461,7 +477,7 @@
   }
   .mix-recipe{
     font-size: 12.5px;
-    color: #C9BFAF;
+    color: var(--note-text);
     line-height:1.6;
     margin: 8px 0 0;
   }
@@ -497,7 +513,6 @@
   .view.active{ display:block; }
 
   /* ---- Like button ---- */
-  .mix-top{ align-items:flex-start; }
   .mix-actions{
     display:flex;
     align-items:center;
@@ -540,6 +555,25 @@
     font-weight:700;
     margin-left: 5px;
   }
+
+  /* ---- Toast (rare failure notices, e.g. favorites didn't save) ---- */
+  .app-toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translateX(-50%);
+    background: var(--surface-raised);
+    color: var(--smoke);
+    border: 1px solid var(--ember);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    z-index: 9999;
+    max-width: 85vw;
+    text-align:center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    display:none;
+  }
 </style>
 </head>
 
@@ -550,10 +584,10 @@
   <h1>Найди свой <em>вкус</em></h1>
   <p class="lead">Крути крепость по шкале от 1 до 10, отметь любимые вкусовые направления — покажем подходящие миксы.</p>
 
-  <div class="tabbar">
-    <div class="tab active" data-view="picker">Подбор вкуса</div>
-    <div class="tab" data-view="photo">По фото</div>
-    <div class="tab" data-view="favorites">Избранное<span class="fav-count-badge" id="favCountBadge" style="display:none;">0</span></div>
+  <div class="tabbar" role="tablist">
+    <div class="tab active" data-view="picker" role="tab" tabindex="0" aria-selected="true">Подбор вкуса</div>
+    <div class="tab" data-view="photo" role="tab" tabindex="0" aria-selected="false">По фото</div>
+    <div class="tab" data-view="favorites" role="tab" tabindex="0" aria-selected="false">Избранное<span class="fav-count-badge" id="favCountBadge" style="display:none;">0</span></div>
   </div>
 
   <div class="view active" id="view-picker">
@@ -568,7 +602,7 @@
       <span class="num" id="numOut">5</span><span class="of">/ 10</span>
     </div>
     <span class="word" id="wordOut">Средний</span>
-    <input type="range" min="1" max="10" step="1" value="5" id="strengthSlider">
+    <input type="range" min="1" max="10" step="1" value="5" id="strengthSlider" aria-label="Желаемая крепость табака от 1 до 10">
     <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
   </div>
 
@@ -588,7 +622,7 @@
     <div class="empty">Собранные под твой запрос миксы из 2-3 табаков появятся здесь.</div>
   </div>
   <button class="reshuffle-btn" id="reshuffleBtn" style="display:none;">🔀 Показать другие варианты</button>
-  <p class="source-note" style="margin-top:-4px;">В базе — 134 микса (собраны алгоритмически из 88 реальных вкусов по тем же правилам миксологии: база ~50-90% + добавка/акцент). Это не рецепты с сайтов и не проверенные тысячами покуров хиты — это идеи для эксперимента. Крепость смещена в сторону 5-9/10: выше по этой базе не поднимается ни один реальный вкус в каталоге, так как настоящие «10/10» могут курить немногие.</p>
+  <p class="source-note" style="margin-top:-4px;">В базе — 408 миксов (собраны алгоритмически из 283 реальных вкусов по тем же правилам миксологии: база ~50-90% + добавка/акцент). Это не рецепты с сайтов и не проверенные тысячами забитых чаш хиты — это идеи для эксперимента. Крепость смещена в сторону 5-9/10: выше этой планки не поднимается ни один готовый микс в базе, хотя отдельные акцентные табаки-регуляторы крепости заявлены производителем на 10/10.</p>
 
   <div class="section-title" style="margin-bottom:2px; margin-top:24px;">Подходящие вкусы соло</div>
   <p class="section-sub" id="resultsSub">Пока пусто — задай параметры выше.</p>
@@ -604,12 +638,12 @@
     <p class="section-sub">Сфотографируй банки с табаком — попробуем распознать бренды и вкусы и сразу предложить миксы.</p>
 
     <div id="photoStep1">
-      <label class="photo-upload-zone" id="photoUploadZone">
+      <label class="photo-upload-zone" id="photoUploadZone" tabindex="0" role="button" aria-label="Выбрать фото табака">
         <input type="file" id="photoFileInput" accept="image/*" style="display:none;">
         <i class="upload-icon">📷</i>
         <span id="photoUploadLabel">Нажми, чтобы выбрать фото</span>
       </label>
-      <img id="photoPreview" style="display:none;">
+      <img id="photoPreview" style="display:none;" alt="Превью выбранного фото табака">
       <button class="cta" id="photoAnalyzeBtn" style="margin-top:14px; display:none;">Распознать →</button>
       <p class="source-note" id="photoStatus" style="display:none;"></p>
     </div>
@@ -642,7 +676,12 @@ try{
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    if (tg.setHeaderColor) { try{ tg.setHeaderColor('#15120E'); }catch(e){} }
+    if (tg.setHeaderColor) {
+      try{
+        const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#15120E';
+        tg.setHeaderColor(inkColor);
+      }catch(e){}
+    }
   }
 }catch(e){}
 
@@ -958,6 +997,13 @@ function strengthWord(v){
 
 // ---------- Smoke plume (signature visual) ----------
 const svg = document.getElementById('plumeSvg');
+// Read from the same CSS custom properties the rest of the UI uses, instead
+// of hardcoding hex values here — if the palette in :root ever changes,
+// the plume follows automatically.
+const rootStyles = getComputedStyle(document.documentElement);
+const PLUME_EMBER_COLOR = rootStyles.getPropertyValue('--ember').trim() || '#E6802F';
+const PLUME_SMOKE_COLOR = rootStyles.getPropertyValue('--smoke').trim() || '#EDE6D9';
+
 function buildPlume(strength){
   svg.innerHTML = '';
   const ns = 'http://www.w3.org/2000/svg';
@@ -973,7 +1019,7 @@ function buildPlume(strength){
     path.setAttribute('d', d);
     path.setAttribute('class','wisp');
     path.setAttribute('fill','none');
-    path.setAttribute('stroke', i % 2 === 0 ? '#E6802F' : '#EDE6D9');
+    path.setAttribute('stroke', i % 2 === 0 ? PLUME_EMBER_COLOR : PLUME_SMOKE_COLOR);
     path.setAttribute('stroke-width', (1.4 + strength*0.12).toFixed(2));
     path.setAttribute('stroke-linecap','round');
     path.setAttribute('opacity', (baseOpacity - i*0.02).toFixed(2));
@@ -990,7 +1036,7 @@ function buildPlume(strength){
   // ember base glow
   const glow = document.createElementNS(ns,'circle');
   glow.setAttribute('cx','100'); glow.setAttribute('cy','126'); glow.setAttribute('r', 4+strength*0.6);
-  glow.setAttribute('fill','#E6802F');
+  glow.setAttribute('fill', PLUME_EMBER_COLOR);
   glow.setAttribute('opacity', 0.5 + strength*0.04);
   svg.appendChild(glow);
 }
@@ -1015,10 +1061,16 @@ CATEGORIES.forEach(cat=>{
   const el = document.createElement('div');
   el.className = 'chip';
   el.innerHTML = `<span>${cat.icon}</span><span>${cat.label}</span>`;
-  el.addEventListener('click', ()=>{
-    if (selected.has(cat.key)){ selected.delete(cat.key); el.classList.remove('active'); }
-    else { selected.add(cat.key); el.classList.add('active'); }
-  });
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('aria-pressed', 'false');
+  el.setAttribute('aria-label', `Фильтр: ${cat.label}`);
+  const toggle = ()=>{
+    if (selected.has(cat.key)){ selected.delete(cat.key); el.classList.remove('active'); el.setAttribute('aria-pressed','false'); }
+    else { selected.add(cat.key); el.classList.add('active'); el.setAttribute('aria-pressed','true'); }
+  };
+  el.addEventListener('click', toggle);
+  el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } });
   el.dataset.key = cat.key;
   chipContainer.appendChild(el);
 });
@@ -1045,10 +1097,16 @@ BRAND_LIST.forEach(brand=>{
   const el = document.createElement('div');
   el.className = 'chip';
   el.textContent = brand;
-  el.addEventListener('click', ()=>{
-    if (selectedBrands.has(brand)){ selectedBrands.delete(brand); el.classList.remove('active'); }
-    else { selectedBrands.add(brand); el.classList.add('active'); }
-  });
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('aria-pressed', 'false');
+  el.setAttribute('aria-label', `Фильтр по бренду: ${brand}`);
+  const toggle = ()=>{
+    if (selectedBrands.has(brand)){ selectedBrands.delete(brand); el.classList.remove('active'); el.setAttribute('aria-pressed','false'); }
+    else { selectedBrands.add(brand); el.classList.add('active'); el.setAttribute('aria-pressed','true'); }
+  };
+  el.addEventListener('click', toggle);
+  el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } });
   el.dataset.brand = brand;
   brandContainer.appendChild(el);
 });
@@ -1130,7 +1188,7 @@ const MIX_RECIPES = [
   { name:'Барный дым', tags:['drink','classic','exotic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Sebero Thai', p:30, s:5}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Барный дым — это густой, тягучий дым, который долго держится. Brisky Whiskey составляет основу (~60%), Thai добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Коктейльное безе', tags:['dessert','drink','classic','mint','tea'], recipe:[{t:'Darkside C.R.E.A.M. S.O.D.A.', p:65, s:6}, {t:'Jent Brisky Whiskey', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Коктейльное безе — это хрустящее безе, тающее во рту. C.R.E.A.M. S.O.D.A. составляет основу (~65%), Brisky Whiskey добавляет напиточный характер (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Игристая традиция', tags:['drink','classic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Deus Guinness', p:30, s:7}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Игристая традиция — это вкус, проверенный поколениями курильщиков. Brisky Whiskey составляет основу (~60%), Guinness добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Классическяя традиция', tags:['drink','classic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Darkside Cosmos', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Классическяя традиция — это вкус, проверенный поколениями курильщиков. Brisky Whiskey составляет основу (~60%), Cosmos добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Классическая традиция', tags:['drink','classic','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Darkside Cosmos', p:30, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Классическая традиция — это вкус, проверенный поколениями курильщиков. Brisky Whiskey составляет основу (~60%), Cosmos добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Вечерний шейк', tags:['drink','classic','berry','dessert','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:65, s:6}, {t:'Spectrum Dezzert Cherry', p:25, s:6}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Вечерний шейк — это взболтанный барменом шейк. Brisky Whiskey составляет основу (~65%), Dezzert Cherry добавляет ягодную кислинку (~25%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Освежающий лимонад', tags:['drink','classic','fruity','mint','tea'], recipe:[{t:'Jent Brisky Whiskey', p:60, s:6}, {t:'Spectrum Grape Soda', p:30, s:4}, {t:'Хулиган Hard Green Queen', p:10, s:8}], note:'Освежающий лимонад — это домашний лимонад со льдом. Brisky Whiskey составляет основу (~60%), Grape Soda добавляет напиточный характер (~30%), Hard Green Queen закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Шипучий бриз', tags:['drink','citrus','mint'], recipe:[{t:'Duft Aperol Spritz', p:65, s:6}, {t:'Black Burn Lemon Shock', p:25, s:7}, {t:'Darkside Dark Mint', p:10, s:5}], note:'Шипучий бриз — это лёгкий ветер с цитрусовой нотой. Aperol Spritz составляет основу (~65%), Lemon Shock добавляет цитрусовую терпкость (~25%), Dark Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -1195,7 +1253,7 @@ const MIX_RECIPES = [
   { name:'Ягодный куст', tags:['berry','dessert','mint'], recipe:[{t:'Darkside Cherry Rocks', p:50, s:5}, {t:'Sarma Клубника со сливками', p:30, s:4}, {t:'Starline Клубничный мильфей', p:10, s:4}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Ягодный куст — это ягодный куст в летнем саду. Cherry Rocks составляет основу (~50%), Клубника со сливками добавляет ягодную кислинку (~30%), Клубничный мильфей добавляет ягодную кислинку (~10%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Сочный сироп', tags:['berry','dessert','fruity','mint'], recipe:[{t:'Darkside Blueberry Blast', p:50, s:6}, {t:'Sarma Клубника со сливками', p:30, s:4}, {t:'Duft Cherry Juice', p:10, s:5}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Сочный сироп — это густой ягодный сироп на блинах. Blueberry Blast составляет основу (~50%), Клубника со сливками добавляет ягодную кислинку (~30%), Cherry Juice добавляет ягодную кислинку (~10%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Шоколадный сироп', tags:['berry','dessert','mint'], recipe:[{t:'Darkside Blackcurrant', p:50, s:6}, {t:'Darkside Cherry Rocks', p:30, s:5}, {t:'Sebero Strawberry', p:10, s:4}, {t:'Satyr Ice Cherry', p:10, s:6}], note:'Шоколадный сироп — это густой ягодный сироп на блинах. Blackcurrant составляет основу (~50%), Cherry Rocks добавляет ягодную кислинку (~30%), Strawberry добавляет ягодную кислинку (~10%), Ice Cherry закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Тропическяя лагуна', tags:['fruity','exotic','drink','citrus'], recipe:[{t:'Darkside Bananapapa', p:50, s:6}, {t:'Bonche Passion Fruit', p:30, s:6}, {t:'Северный Кучерявый персик', p:10, s:5}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Тропическяя лагуна — это бирюзовая лагуна в полдень. Bananapapa составляет основу (~50%), Passion Fruit добавляет экзотическую нотку (~30%), Кучерявый персик добавляет фруктовую сочность (~10%), Огонь — Margarita закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Тропическая лагуна', tags:['fruity','exotic','drink','citrus'], recipe:[{t:'Darkside Bananapapa', p:50, s:6}, {t:'Bonche Passion Fruit', p:30, s:6}, {t:'Северный Кучерявый персик', p:10, s:5}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Тропическая лагуна — это бирюзовая лагуна в полдень. Bananapapa составляет основу (~50%), Passion Fruit добавляет экзотическую нотку (~30%), Кучерявый персик добавляет фруктовую сочность (~10%), Огонь — Margarita закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Фруктовый стакан', tags:['fruity','drink','citrus'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Darkside Bananapapa', p:30, s:6}, {t:'Северный Кучерявый персик', p:10, s:5}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Фруктовый стакан — это запотевший стакан с холодным напитком. Breaking Red составляет основу (~50%), Bananapapa добавляет фруктовую сочность (~30%), Кучерявый персик добавляет фруктовую сочность (~10%), Огонь — Margarita закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Бодрящий сад', tags:['citrus','fruity','drink'], recipe:[{t:'Element Земля — Grapefruit & Pomelo', p:50, s:7}, {t:'Северный Кучерявый персик', p:30, s:5}, {t:'Darkside Bananapapa', p:10, s:6}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Бодрящий сад — это прогулка по фруктовому саду в жаркий день. Земля — Grapefruit & Pomelo составляет основу (~50%), Кучерявый персик добавляет фруктовую сочность (~30%), Bananapapa добавляет фруктовую сочность (~10%), Огонь — Margarita закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Спелый компот', tags:['fruity','exotic','mint'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Северный Кучерявый персик', p:30, s:5}, {t:'Bonche Passion Fruit', p:10, s:6}, {t:'Black Burn Kiwi Stoner', p:10, s:7}], note:'Спелый компот — это домашний компот из свежих фруктов. Breaking Red составляет основу (~50%), Кучерявый персик добавляет фруктовую сочность (~30%), Passion Fruit добавляет экзотическую нотку (~10%), Kiwi Stoner закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -1203,7 +1261,7 @@ const MIX_RECIPES = [
   { name:'Взрывная россыпь', tags:['citrus','berry','fruity','mint'], recipe:[{t:'Darkside Kalee Grapefruit', p:50, s:6}, {t:'Adalya Lady Killer', p:30, s:6}, {t:'Duft Cherry Juice', p:10, s:5}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Взрывная россыпь — это россыпь спелых ягод в горсти. Kalee Grapefruit составляет основу (~50%), Lady Killer добавляет ягодную кислинку (~30%), Cherry Juice добавляет ягодную кислинку (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сладкий фрукт', tags:['fruity','dessert','drink','citrus'], recipe:[{t:'Darkside Breaking Red', p:50, s:6}, {t:'Nаш Чупа чупс', p:30, s:5}, {t:'Musthave Ванильный крем', p:10, s:6}, {t:'Element Огонь — Margarita', p:10, s:8}], note:'Сладкий фрукт — это спелый фрукт, надкушенный впервые. Breaking Red составляет основу (~50%), Чупа чупс добавляет десертную сладость (~30%), Ванильный крем добавляет десертную сладость (~10%), Огонь — Margarita закрывает микс лёгким акцентом (~10%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Весенний букет', tags:['citrus','floral','mint'], recipe:[{t:'Black Burn Lemon Shock', p:50, s:7}, {t:'Darkside Kalee Grapefruit', p:30, s:6}, {t:'Deus Rose Grapefruit', p:10, s:7}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Весенний букет — это собранный вручную цветочный букет. Lemon Shock составляет основу (~50%), Kalee Grapefruit добавляет цитрусовую терпкость (~30%), Rose Grapefruit добавляет цветочный шлейф (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Бодрящяя долька', tags:['drink','citrus','mint'], recipe:[{t:'Duft Aperol Spritz', p:50, s:6}, {t:'Black Burn Lemon Shock', p:30, s:7}, {t:'Sebero Root Beer', p:10, s:6}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Бодрящяя долька — это сочная долька, только что очищенная. Aperol Spritz составляет основу (~50%), Lemon Shock добавляет цитрусовую терпкость (~30%), Root Beer добавляет напиточный характер (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Бодрящая долька', tags:['drink','citrus','mint'], recipe:[{t:'Duft Aperol Spritz', p:50, s:6}, {t:'Black Burn Lemon Shock', p:30, s:7}, {t:'Sebero Root Beer', p:10, s:6}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Бодрящая долька — это сочная долька, только что очищенная. Aperol Spritz составляет основу (~50%), Lemon Shock добавляет цитрусовую терпкость (~30%), Root Beer добавляет напиточный характер (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Ядрёный бокал', tags:['drink','citrus','mint'], recipe:[{t:'Duft Aperol Spritz', p:50, s:6}, {t:'Darkside Lemonblast', p:30, s:7}, {t:'Deus Guinness', p:10, s:7}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Ядрёный бокал — это бокал, наполненный до краёв. Aperol Spritz составляет основу (~50%), Lemonblast добавляет цитрусовую терпкость (~30%), Guinness добавляет напиточный характер (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Вечерний стакан', tags:['citrus','drink','mint'], recipe:[{t:'Black Burn Lemon Shock', p:50, s:7}, {t:'Darkside Bloody Orange', p:30, s:6}, {t:'Duft Aperol Spritz', p:10, s:6}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Вечерний стакан — это запотевший стакан с холодным напитком. Lemon Shock составляет основу (~50%), Bloody Orange добавляет цитрусовую терпкость (~30%), Aperol Spritz добавляет напиточный характер (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Искристый экватор', tags:['citrus','exotic','fruity','mint'], recipe:[{t:'Black Burn Lemon Shock', p:50, s:7}, {t:'Darkside Bounty Hunter', p:30, s:6}, {t:'Sarma Дыня', p:10, s:3}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Искристый экватор — это зной, будто прямо на экваторе. Lemon Shock составляет основу (~50%), Bounty Hunter добавляет экзотическую нотку (~30%), Дыня добавляет фруктовую сочность (~10%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -1242,7 +1300,7 @@ const MIX_RECIPES = [
   { name:'Пальмовый остров', tags:['classic','exotic','fruity','mint'], recipe:[{t:'Black Burn На Чиле (feat. Джиган)', p:60, s:7}, {t:'Sarma Двойное яблоко', p:30, s:4}, {t:'Хулиган Hard Daa (Манго-Эвкалипт)', p:10, s:8}], note:'Пальмовый остров — это уединённый остров вдали от всех. На Чиле (feat. Джиган) составляет основу (~60%), Двойное яблоко добавляет фруктовую сочность (~30%), Hard Daa (Манго-Эвкалипт) закрывает микс лёгким холодком, не больше 10%. Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Бодрящий витамин', tags:['berry','citrus','dessert'], recipe:[{t:'Darkside Dark Icecream', p:50, s:6}, {t:'Sebero Lemon Candy', p:35, s:4}, {t:'Musthave Pinkman', p:15, s:5}], note:'Бодрящий витамин — это заряд витаминов в разгар простуды. Dark Icecream составляет основу (~50%), Lemon Candy добавляет цитрусовую терпкость (~35%), Pinkman закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Бисквитный зефир', tags:['dessert','drink','fruity'], recipe:[{t:'Overdose Fig Lemonade', p:55, s:7}, {t:'Adalya Cactus', p:25, s:4}, {t:'Adalya Love 66', p:20, s:5}], note:'Бисквитный зефир — это воздушный зефир к чаю. Fig Lemonade составляет основу (~55%), Cactus добавляет фруктовую сочность (~25%), Love 66 закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Классическяя легенда', tags:['classic','exotic','fruity'], recipe:[{t:'Satyr NEFT', p:55, s:8}, {t:'Spectrum Pine Wood', p:25, s:8}, {t:'Darkside Papaya', p:20, s:6}], note:'Классическяя легенда — это вкус, который давно стал легендой кальянных. NEFT составляет основу (~55%), Pine Wood добавляет табачную плотность (~25%), Papaya закрывает микс лёгким акцентом (~20%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
+  { name:'Классическая легенда', tags:['classic','exotic','fruity'], recipe:[{t:'Satyr NEFT', p:55, s:8}, {t:'Spectrum Pine Wood', p:25, s:8}, {t:'Darkside Papaya', p:20, s:6}], note:'Классическая легенда — это вкус, который давно стал легендой кальянных. NEFT составляет основу (~55%), Pine Wood добавляет табачную плотность (~25%), Papaya закрывает микс лёгким акцентом (~20%). Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Полевая гроздь', tags:['berry','exotic','fruity'], recipe:[{t:'Black Burn Cranberry', p:55, s:7}, {t:'Daily Hookah Личи-малина', p:30, s:5}, {t:'Jent Aloha Corn', p:15, s:6}], note:'Полевая гроздь — это тяжёлая гроздь спелых ягод. Cranberry составляет основу (~55%), Личи-малина добавляет экзотическую нотку (~30%), Aloha Corn закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сладкий сад', tags:['dessert','fruity'], recipe:[{t:'Black Burn Almond Icecream', p:60, s:7}, {t:'Black Burn Original Popcorn', p:25, s:7}, {t:'Element Воздух — Mangello', p:15, s:3}], note:'Сладкий сад — это прогулка по фруктовому саду в жаркий день. Almond Icecream составляет основу (~60%), Original Popcorn добавляет десертную сладость (~25%), Воздух — Mangello закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Кисловатый сироп', tags:['berry','fruity','spice'], recipe:[{t:'Хулиган Hard OG Club (Клубника)', p:50, s:8}, {t:'Jent Your Grace', p:35, s:6}, {t:'Satyr Арбуз-Малина-Земляника', p:15, s:7}], note:'Кисловатый сироп — это густой ягодный сироп на блинах. Hard OG Club (Клубника) составляет основу (~50%), Your Grace добавляет ягодную кислинку (~35%), Арбуз-Малина-Земляника закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
@@ -1263,7 +1321,7 @@ const MIX_RECIPES = [
   { name:'Медовое безе', tags:['dessert','fruity'], recipe:[{t:'Darkside Cookie', p:55, s:6}, {t:'Darkside Dark Icecream', p:25, s:6}, {t:'Sarma Персик со сливками', p:20, s:4}], note:'Медовое безе — это хрустящее безе, тающее во рту. Cookie составляет основу (~55%), Dark Icecream добавляет десертную сладость (~25%), Персик со сливками закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Джемовая косточка', tags:['fruity'], recipe:[{t:'Sebero Wonder Melons', p:55, s:4}, {t:'Sarma Киви', p:25, s:7}, {t:'Satyr Georgia Grapes', p:20, s:7}], note:'Джемовая косточка — это сочный плод с косточкой внутри. Wonder Melons составляет основу (~55%), Киви добавляет фруктовую сочность (~25%), Georgia Grapes закрывает микс лёгким акцентом (~20%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Лесной рай', tags:['berry','exotic','fruity'], recipe:[{t:'Overdose Fantola', p:55, s:8}, {t:'Duft Cherry Juice', p:30, s:5}, {t:'Sebero Wonder Melons', p:15, s:4}], note:'Лесной рай — это кусочек тропического рая в чаше. Fantola составляет основу (~55%), Cherry Juice добавляет ягодную кислинку (~30%), Wonder Melons закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Заморскяя лагуна', tags:['exotic','fruity','dessert'], recipe:[{t:'Spectrum Jungle Mix', p:60, s:4}, {t:'Sebero Vanilla', p:25, s:5}, {t:'Darkside Dark Icecream', p:15, s:6}], note:'Заморскяя лагуна — это бирюзовая лагуна в полдень. Jungle Mix составляет основу (~60%), Vanilla добавляет десертную сладость (~25%), Dark Icecream закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Заморская лагуна', tags:['exotic','fruity','dessert'], recipe:[{t:'Spectrum Jungle Mix', p:60, s:4}, {t:'Sebero Vanilla', p:25, s:5}, {t:'Darkside Dark Icecream', p:15, s:6}], note:'Заморская лагуна — это бирюзовая лагуна в полдень. Jungle Mix составляет основу (~60%), Vanilla добавляет десертную сладость (~25%), Dark Icecream закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Сладкий зефир', tags:['citrus','dessert'], recipe:[{t:'Darkside Eclipse', p:55, s:6}, {t:'Северный Какао', p:25, s:6}, {t:'Adalya Swiss Bonbon', p:20, s:4}], note:'Сладкий зефир — это воздушный зефир к чаю. Eclipse составляет основу (~55%), Какао добавляет десертную сладость (~25%), Swiss Bonbon закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Медовый фрукт', tags:['fruity'], recipe:[{t:'Северный Арбуз', p:60, s:5}, {t:'Chabacco White Apple', p:25, s:5}, {t:'Северный Пиковый Виноград', p:15, s:5}], note:'Медовый фрукт — это спелый фрукт, надкушенный впервые. Арбуз составляет основу (~60%), White Apple добавляет фруктовую сочность (~25%), Пиковый Виноград закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Классический вечер', tags:['classic','fruity'], recipe:[{t:'Adalya Chuck Norris', p:50, s:5}, {t:'Satyr 1915', p:30, s:8}, {t:'Satyr Дюбек с персиком', p:20, s:8}], note:'Классический вечер — это поздний вечер в компании старых друзей. Chuck Norris составляет основу (~50%), 1915 добавляет табачную плотность (~30%), Дюбек с персиком закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
@@ -1288,11 +1346,11 @@ const MIX_RECIPES = [
   { name:'Багровый морс', tags:['berry','classic','spice'], recipe:[{t:'Северный Пихта', p:60, s:7}, {t:'Spectrum Pine Wood', p:25, s:8}, {t:'Sebero Herbal-Currant', p:15, s:6}], note:'Багровый морс — это домашний ягодный морс со льдом. Пихта составляет основу (~60%), Pine Wood добавляет табачную плотность (~25%), Herbal-Currant закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сладкий оазис', tags:['fruity','exotic','dessert'], recipe:[{t:'Sarma Киви', p:55, s:7}, {t:'Sarma Дыня', p:30, s:3}, {t:'Sarma Персик со сливками', p:15, s:4}], note:'Сладкий оазис — это прохладный оазис среди песков. Киви составляет основу (~55%), Дыня добавляет фруктовую сочность (~30%), Персик со сливками закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Коктейльная цедра', tags:['citrus','drink','fruity','exotic'], recipe:[{t:'Overdose Frustyle', p:60, s:8}, {t:'Spectrum Grape Soda', p:25, s:4}, {t:'Overdose Bali Mango', p:15, s:8}], note:'Коктейльная цедра — это цедра, снятая тонкой стружкой. Frustyle составляет основу (~60%), Grape Soda добавляет напиточный характер (~25%), Bali Mango закрывает микс лёгким акцентом (~15%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Освежающяя лагуна', tags:['drink','exotic','fruity'], recipe:[{t:'Satyr Mango', p:60, s:7}, {t:'Sebero Thai', p:25, s:5}, {t:'Adalya Cactus', p:15, s:4}], note:'Освежающяя лагуна — это бирюзовая лагуна в полдень. Mango составляет основу (~60%), Thai добавляет напиточный характер (~25%), Cactus закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
+  { name:'Освежающая лагуна', tags:['drink','exotic','fruity'], recipe:[{t:'Satyr Mango', p:60, s:7}, {t:'Sebero Thai', p:25, s:5}, {t:'Adalya Cactus', p:15, s:4}], note:'Освежающая лагуна — это бирюзовая лагуна в полдень. Mango составляет основу (~60%), Thai добавляет напиточный характер (~25%), Cactus закрывает микс лёгким акцентом (~15%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Наливная россыпь', tags:['berry','fruity'], recipe:[{t:'Bonche Wild Strawberry', p:55, s:7}, {t:'Duft Cherry Juice', p:25, s:5}, {t:'Северный Брусника', p:20, s:6}], note:'Наливная россыпь — это россыпь спелых ягод в горсти. Wild Strawberry составляет основу (~55%), Cherry Juice добавляет ягодную кислинку (~25%), Брусника закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
   { name:'Сахарный стакан', tags:['drink','fruity','berry','mint'], recipe:[{t:'Darkside Cola', p:60, s:6}, {t:'Spectrum Grape Soda', p:30, s:4}, {t:'Chabacco Strawberry Mojito', p:10, s:5}], note:'Сахарный стакан — это запотевший стакан с холодным напитком. Cola составляет основу (~60%), Grape Soda добавляет напиточный характер (~30%), Strawberry Mojito закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Вечерний сок', tags:['citrus','drink','exotic'], recipe:[{t:'Satyr Cola', p:50, s:7}, {t:'Sebero Limoncello', p:30, s:5}, {t:'Sebero Thai', p:20, s:5}], note:'Вечерний сок — это свежевыжатый сок с мякотью. Cola составляет основу (~50%), Limoncello добавляет цитрусовую терпкость (~30%), Thai закрывает микс лёгким акцентом (~20%). Крепость ~6/10 — уверенная средняя крепость на каждый день.' },
-  { name:'Терпкяя россыпь', tags:['berry','citrus','classic','dessert'], recipe:[{t:'Adalya Dark Forest', p:50, s:5}, {t:'Musthave Pinkman', p:35, s:5}, {t:'Black Burn HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника)', p:15, s:5}], note:'Терпкяя россыпь — это россыпь спелых ягод в горсти. Dark Forest составляет основу (~50%), Pinkman добавляет ягодную кислинку (~35%), HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника) закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Терпкая россыпь', tags:['berry','citrus','classic','dessert'], recipe:[{t:'Adalya Dark Forest', p:50, s:5}, {t:'Musthave Pinkman', p:35, s:5}, {t:'Black Burn HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника)', p:15, s:5}], note:'Терпкая россыпь — это россыпь спелых ягод в горсти. Dark Forest составляет основу (~50%), Pinkman добавляет ягодную кислинку (~35%), HiT — DJ Marshmallow (Маршмеллоу, Клубника, Земляника) закрывает микс лёгким акцентом (~15%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Освежающий шейк', tags:['fruity','classic','drink','mint'], recipe:[{t:'Sarma Двойное яблоко', p:65, s:4}, {t:'Spectrum Grape Soda', p:25, s:4}, {t:'Северный Professional Виноград мята', p:10, s:8}], note:'Освежающий шейк — это взболтанный барменом шейк. Двойное яблоко составляет основу (~65%), Grape Soda добавляет напиточный характер (~25%), Виноград мята закрывает микс лёгким холодком, не больше 10%. Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Медовый лёд', tags:['fruity','mint'], recipe:[{t:'Хулиган Hard Turbo (Арбуз-Дыня)', p:60, s:8}, {t:'Black Burn Apple Shock', p:30, s:7}, {t:'Black Burn Kiwi Stoner', p:10, s:7}], note:'Медовый лёд — это ледяная корка, которая тает на языке. Hard Turbo (Арбуз-Дыня) составляет основу (~60%), Apple Shock добавляет фруктовую сочность (~30%), Kiwi Stoner закрывает микс лёгким холодком, не больше 10%. Крепость ~8/10 — ощутимый, крепкий пробив для тех, кто любит погорячее.' },
   { name:'Сочный бар', tags:['berry','drink','floral'], recipe:[{t:'Overdose Sweet Rose', p:50, s:7}, {t:'Хулиган Hard OG Club (Клубника)', p:30, s:8}, {t:'Musthave Cherry Cola', p:20, s:5}], note:'Сочный бар — это атмосфера бара поздним вечером. Sweet Rose составляет основу (~50%), Hard OG Club (Клубника) добавляет ягодную кислинку (~30%), Cherry Cola закрывает микс лёгким акцентом (~20%). Крепость ~7/10 — уверенная средняя крепость на каждый день.' },
@@ -1502,15 +1560,41 @@ const MIX_RECIPES = [
 MIX_RECIPES.forEach((m, i)=>{ m.id = 'mix_' + i; m.brands = detectBrandsInRecipe(m.recipe); });
 
 let favoriteIds = new Set();
-const hasWidgetStorage = typeof window.storage !== 'undefined';
+const FAVORITES_KEY = 'favorite_mix_ids';
+
+// window.storage is the Claude.ai artifact sandbox API — it does not exist
+// in the real deployed app (GitHub Pages inside Telegram), so it can never
+// be used here. Real persistence needs one of:
+//   1. Telegram.WebApp.CloudStorage — syncs across the user's devices,
+//      available whenever the app runs inside an actual Telegram client.
+//   2. localStorage — universal fallback (e.g. testing outside Telegram),
+//      but stays on just this one browser/device.
+const tgCloud = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) || null;
+
+function cloudGetItem(key){
+  return new Promise((resolve)=>{
+    tgCloud.getItem(key, (err, value)=> resolve(err ? null : value));
+  });
+}
+function cloudSetItem(key, value){
+  return new Promise((resolve, reject)=>{
+    tgCloud.setItem(key, value, (err, success)=>{
+      if (err) reject(new Error(err));
+      else resolve();
+    });
+  });
+}
 
 async function loadFavorites(){
   try{
-    if (hasWidgetStorage){
-      const res = await window.storage.get('favorite_mix_ids', false);
-      if (res && res.value){
-        favoriteIds = new Set(JSON.parse(res.value));
-      }
+    let raw = null;
+    if (tgCloud){
+      raw = await cloudGetItem(FAVORITES_KEY);
+    } else {
+      raw = localStorage.getItem(FAVORITES_KEY);
+    }
+    if (raw){
+      favoriteIds = new Set(JSON.parse(raw));
     }
   }catch(e){
     // key not found yet or storage unavailable — start with empty favorites
@@ -1519,23 +1603,47 @@ async function loadFavorites(){
   renderFavorites();
 }
 
+// Minimal toast — used only for rare failures the person should actually
+// know about (e.g. favorites failed to save), not for routine feedback.
+function showToast(message){
+  let toast = document.getElementById('appToast');
+  if (!toast){
+    toast = document.createElement('div');
+    toast.id = 'appToast';
+    toast.className = 'app-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.display = 'block';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>{ toast.style.display = 'none'; }, 3000);
+}
+
 async function saveFavorites(){
+  const raw = JSON.stringify([...favoriteIds]);
   try{
-    if (hasWidgetStorage){
-      await window.storage.set('favorite_mix_ids', JSON.stringify([...favoriteIds]), false);
+    if (tgCloud){
+      await cloudSetItem(FAVORITES_KEY, raw);
+    } else {
+      localStorage.setItem(FAVORITES_KEY, raw);
     }
+    return true;
   }catch(e){
     console.error('Не удалось сохранить избранное:', e);
+    return false;
   }
 }
 
-function toggleFavorite(id){
+async function toggleFavorite(id){
   if (favoriteIds.has(id)) favoriteIds.delete(id);
   else favoriteIds.add(id);
-  saveFavorites();
   updateFavCountBadge();
   rerenderRecipeCardsOnly();
   renderFavorites();
+  const ok = await saveFavorites();
+  if (!ok){
+    showToast('Не удалось сохранить избранное — попробуй ещё раз');
+  }
 }
 window.toggleFavorite = toggleFavorite;
 
@@ -1567,7 +1675,7 @@ function buildMixCardHtml(m, opts){
         <div class="mix-name">${m.name}</div>
         <div class="mix-actions">
           <span class="mix-rating">${m.strength}/10</span>
-          <button class="like-btn ${liked?'liked':''}" onclick="toggleFavorite('${m.id}')" title="${liked?'Убрать из избранного':'В избранное'}">${liked?'♥':'♡'}</button>
+          <button class="like-btn ${liked?'liked':''}" onclick="toggleFavorite('${m.id}')" title="${liked?'Убрать из избранного':'В избранное'}" aria-label="${liked?'Убрать из избранного':'Добавить в избранное'}" aria-pressed="${liked}">${liked?'♥':'♡'}</button>
         </div>
       </div>
       ${matchLabel}
@@ -1577,6 +1685,18 @@ function buildMixCardHtml(m, opts){
     </div>
   `;
 }
+
+// Percentage-split conventions used when building every recipe in
+// MIX_RECIPES (via offline Python scripts, not at runtime here). Documented
+// in-app so this isn't tribal knowledge living only in old generation
+// scripts — reference this if the app ever needs to generate mixes
+// client-side beyond buildLiveMixFromMatched()'s simpler photo-flow version.
+const MIX_RATIO_CONVENTIONS = {
+  2: [[65,35]],
+  3: [[55,30,15],[50,35,15],[60,25,15],[50,30,20],[55,25,20],[45,35,20],[65,20,15]],
+  '3_mintAccent': [[60,30,10],[55,35,10],[65,25,10],[50,40,10]],
+  4: [[45,30,15,10],[50,25,15,10],[40,30,20,10]],
+};
 
 function computeRecipeStrength(recipe){
   const weighted = recipe.reduce((sum, item)=> sum + item.s * (item.p/100), 0);
@@ -1688,6 +1808,16 @@ function poolSizeForCurrentFilters(){
   return pool.length;
 }
 
+// Standard Russian pluralization: handles the "21 микс" / "22 микса" /
+// "11 миксов" exceptions that a simple 1 / 2-4 / else split gets wrong.
+function pluralRu(n, one, few, many){
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
+}
+
 function renderFavorites(){
   const favSub = document.getElementById('favSub');
   const favResultsEl = document.getElementById('favResults');
@@ -1703,7 +1833,7 @@ function renderFavorites(){
     return;
   }
 
-  favSub.textContent = `Сохранено ${favMixes.length} ${favMixes.length===1?'микс':(favMixes.length>=2&&favMixes.length<=4?'микса':'миксов')}.`;
+  favSub.textContent = `Сохранено ${favMixes.length} ${pluralRu(favMixes.length, 'микс', 'микса', 'миксов')}.`;
   favResultsEl.innerHTML = favMixes.map(m=> buildMixCardHtml(m, { showMatch:false })).join('');
 }
 
@@ -1789,8 +1919,17 @@ let photoBase64 = null;
 let photoDetectedItems = [];
 
 // Note: photoUploadZone is a <label> wrapping the <input type="file">,
-// so the browser already opens the file picker on click natively —
-// no extra JS listener needed here (that used to cause a double-open).
+// so a mouse/touch click already opens the file picker natively — no extra
+// JS needed for that (an extra click() listener here used to cause a
+// double-open). But the input is display:none, which removes it from the
+// keyboard tab order entirely, so Enter/Space on the now-focusable label
+// needs an explicit handler to open the picker for keyboard users.
+photoUploadZone.addEventListener('keydown', (e)=>{
+  if (e.key === 'Enter' || e.key === ' '){
+    e.preventDefault();
+    photoFileInput.click();
+  }
+});
 
 // Loads heic2any from CDN once, on demand (most photos aren't HEIC, so we
 // don't pay for this library unless we actually need it).
@@ -1899,12 +2038,27 @@ const PHOTO_MERGE_THRESHOLD = 2;      // only bother with merge passes if the fi
 // fire a fresh batch of paid requests for data we already have.
 let photoResultCache = null; // { base64, items }
 
+const ANALYZE_TIMEOUT_MS = 25000; // long enough for a slow real request, short enough that a hung connection doesn't strand the user indefinitely
+
 async function callAnalyzeOnce(){
-  const resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageBase64: photoBase64 })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(()=> controller.abort(), ANALYZE_TIMEOUT_MS);
+  let resp;
+  try{
+    resp = await fetch(PHOTO_WORKER_URL + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: photoBase64 }),
+      signal: controller.signal,
+    });
+  }catch(err){
+    if (err.name === 'AbortError'){
+      throw new Error('сервер не ответил вовремя');
+    }
+    throw err;
+  }finally{
+    clearTimeout(timeoutId);
+  }
   const data = await resp.json();
   if (!resp.ok || data.error){
     throw new Error(data.error || 'ошибка сервиса');
@@ -2022,15 +2176,17 @@ function showPhotoStep2(){
 function renderPhotoChips(){
   photoDetectedChips.innerHTML = photoDetectedItems.map((name,i)=>`
     <div class="chip removable">
-      <span>${name}</span>
-      <span class="chip-remove" data-idx="${i}">✕</span>
+      <span>${escapeHtml(name)}</span>
+      <span class="chip-remove" data-idx="${i}" role="button" tabindex="0" aria-label="Убрать «${escapeHtml(name)}» из списка">✕</span>
     </div>
   `).join('');
   photoDetectedChips.querySelectorAll('.chip-remove').forEach(el=>{
-    el.addEventListener('click', ()=>{
+    const removeThis = ()=>{
       photoDetectedItems.splice(parseInt(el.dataset.idx,10), 1);
       renderPhotoChips();
-    });
+    };
+    el.addEventListener('click', removeThis);
+    el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); removeThis(); } });
   });
 }
 
@@ -2053,6 +2209,19 @@ photoRetryBtn.addEventListener('click', ()=>{
 // Pass 2: just a distinctive flavor name appears (looser fallback).
 // Splits a string into meaningful word tokens for fuzzy comparison —
 // strips punctuation/parentheses/quotes, drops 1-character fragments.
+// Photo-recognition text comes from an external vision model reading tobacco
+// labels — untrusted external input. Escaping before it ever hits innerHTML
+// prevents a maliciously crafted label (or a model mistake) from injecting
+// markup into the page.
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 function tokenize(s){
   return s.toLowerCase()
     .replace(/["«»'?()]/g, ' ')
@@ -2060,21 +2229,39 @@ function tokenize(s){
     .filter(w => w.length >= 2);
 }
 
+// Strip whitespace and dash variants entirely (not just collapse) so
+// "Black Burn" / "Blackburn" / "Black-Burn" all normalize to the same
+// string, and an em-dash vs hyphen doesn't break a match either.
+function tightNorm(s){
+  return s.toLowerCase().replace(/[«»"'?]/g,'').replace(/[\s\-–—]+/g,'').trim();
+}
+
+const FUZZY_MATCH_THRESHOLD = 0.5; // at least half of a flavor's meaningful words must show up to count as a fuzzy match
+
+// Precomputed once at load, not on every matchDetectedToFlavor() call.
+// Normalizing/tokenizing all 270+ flavor names with regex is the actual
+// expensive part of matching (not the array scan itself) — caching it here
+// turns "re-normalize everything on every photo" into "normalize once,
+// then just compare cached strings" for every subsequent call.
+const FLAVOR_MATCH_INDEX = FLAVORS.map(f => {
+  const normBrand = tightNorm(f.brand);
+  const normName = tightNorm(f.name);
+  const brandTokens = tokenize(f.brand);
+  const nameTokens = tokenize(f.name).filter(t => !brandTokens.includes(t));
+  return { flavor: f, normBrand, normName, brandTokens, nameTokens };
+}).sort((a,b) => b.normBrand.length - a.normBrand.length);
+// Sorted longest-brand-first so a more specific brand name (e.g. "Северный
+// Professional") is always checked before a shorter brand it happens to
+// contain as a prefix (e.g. "Северный") — otherwise the first substring
+// match found wins, even if a longer, more correct one exists later in
+// the array. Mirrors the same fix already applied to BRAND_LIST_BY_LENGTH.
+
 function matchDetectedToFlavor(detectedStr){
-  // Strip whitespace and dash variants entirely (not just collapse) so
-  // "Black Burn" / "Blackburn" / "Black-Burn" all normalize to the same
-  // string, and an em-dash vs hyphen doesn't break a match either.
-  const norm = s => s.toLowerCase().replace(/[«»"'?]/g,'').replace(/[\s\-–—]+/g,'').trim();
-  const d = norm(detectedStr);
-  for (const f of FLAVORS){
-    if (d.includes(norm(f.brand)) && d.includes(norm(f.name))){
-      return f;
-    }
-  }
-  for (const f of FLAVORS){
-    const name = norm(f.name);
-    if (name.length >= 4 && d.includes(name)){
-      return f;
+  const d = tightNorm(detectedStr);
+
+  for (const idx of FLAVOR_MATCH_INDEX){
+    if (d.includes(idx.normBrand) && d.includes(idx.normName)){
+      return idx.flavor;
     }
   }
 
@@ -2082,29 +2269,30 @@ function matchDetectedToFlavor(detectedStr){
   // the flavor name correctly but drops a chunk (e.g. skips "(feat. Джиган)"
   // or misses a sub-name like "Grape Rave"). Instead of requiring the whole
   // stored name as one substring, score by how many of its meaningful words
-  // actually showed up — brand match is still required first, so this can't
-  // match a completely different brand's flavor.
+  // actually showed up — brand match is REQUIRED first (unlike a plain
+  // name-only substring check), so a short generic flavor name like "Арбуз"
+  // can't falsely match just because that word appears somewhere in
+  // unrelated detected text — it has to belong to a brand that's actually
+  // present too.
   const detectedTokens = new Set(tokenize(detectedStr));
   let best = null;
   let bestScore = 0;
-  for (const f of FLAVORS){
-    const brandTokens = tokenize(f.brand);
-    const brandPresent = d.includes(norm(f.brand)) || (brandTokens.length > 0 && brandTokens.every(bt => detectedTokens.has(bt)));
+  for (const idx of FLAVOR_MATCH_INDEX){
+    const brandPresent = d.includes(idx.normBrand) || (idx.brandTokens.length > 0 && idx.brandTokens.every(bt => detectedTokens.has(bt)));
     if (!brandPresent) continue;
 
-    const nameTokens = tokenize(f.name).filter(t => !brandTokens.includes(t));
-    if (nameTokens.length === 0) continue;
-    const matchedCount = nameTokens.filter(t => detectedTokens.has(t)).length;
-    const score = matchedCount / nameTokens.length;
+    if (idx.nameTokens.length === 0) continue;
+    const matchedCount = idx.nameTokens.filter(t => detectedTokens.has(t)).length;
+    const score = matchedCount / idx.nameTokens.length;
     if (score > bestScore){
       bestScore = score;
-      best = f;
+      best = idx.flavor;
     }
   }
   // Require at least half of the flavor's meaningful words to be present —
   // enough to survive a dropped sub-name or bracketed credit, but not so
   // loose that two unrelated flavors from the same brand get confused.
-  if (best && bestScore >= 0.5){
+  if (best && bestScore >= FUZZY_MATCH_THRESHOLD){
     return best;
   }
 
@@ -2114,22 +2302,35 @@ function matchDetectedToFlavor(detectedStr){
 photoConfirmBtn.addEventListener('click', async ()=>{
   if (photoDetectedItems.length === 0) return;
 
-  const matched = [];
+  const matchedRaw = [];
   const unmatched = [];
   photoDetectedItems.forEach(item=>{
     const f = matchDetectedToFlavor(item);
-    if (f) matched.push(f); else unmatched.push(item);
+    if (f) matchedRaw.push(f); else unmatched.push(item);
   });
 
-  // send unmatched names to the Worker for later manual review
+  // Two detected strings can resolve to the same catalog flavor (same jar
+  // photographed twice, or two slightly different OCR readings of one
+  // label) — dedupe by brand+name so it never shows as a doubled-up chip
+  // or, worse, a doubled-up ingredient line in the live mix.
+  const seenFlavors = new Set();
+  const matched = matchedRaw.filter(f=>{
+    const key = `${f.brand}|${f.name}`;
+    if (seenFlavors.has(key)) return false;
+    seenFlavors.add(key);
+    return true;
+  });
+
+  // Send unmatched names to the Worker for later manual review — fire and
+  // forget, deliberately not awaited. This is explicitly non-critical (we
+  // already ignore its errors below), so it must never delay showing the
+  // person their actual results if the connection is slow or hangs.
   if (unmatched.length > 0){
-    try{
-      await fetch(PHOTO_WORKER_URL + '/log-unknown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-App-Key': APP_SHARED_KEY },
-        body: JSON.stringify({ items: unmatched })
-      });
-    }catch(e){ /* non-critical, ignore network errors here */ }
+    fetch(PHOTO_WORKER_URL + '/log-unknown', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-App-Key': APP_SHARED_KEY },
+      body: JSON.stringify({ items: unmatched })
+    }).catch(e => { /* non-critical, ignore network errors here */ });
   }
 
   renderPhotoResults(matched, unmatched);
@@ -2144,14 +2345,14 @@ function renderPhotoResults(matched, unmatched){
   if (matched.length > 0){
     html += `<div class="photo-result-block">
       <div class="photo-result-title">✅ Учли в подборе</div>
-      <div class="chips">${matched.map(f=>`<span class="chip active">${f.brand} ${f.name}</span>`).join('')}</div>
+      <div class="chips">${matched.map(f=>`<span class="chip active">${escapeHtml(f.brand)} ${escapeHtml(f.name)}</span>`).join('')}</div>
     </div>`;
   }
 
   if (unmatched.length > 0){
     html += `<div class="photo-result-block">
       <div class="photo-result-title">❓ Не нашли в базе</div>
-      ${unmatched.map(n=>`<span class="photo-unknown-pill">${n}</span>`).join('')}
+      ${unmatched.map(n=>`<span class="photo-unknown-pill">${escapeHtml(n)}</span>`).join('')}
       <p class="ts" style="font-size:12px; color:var(--muted); margin-top:6px;">Такого вкуса в базе ещё нет. Взяли на заметку — проверим и добавим в ближайшее время.</p>
     </div>`;
   }
@@ -2200,16 +2401,29 @@ function renderPhotoResults(matched, unmatched){
 // Builds one mix using only the exact flavors the person confirmed they have —
 // strongest flavor anchors the base, everything else follows in descending
 // order, mint-tagged flavors capped at 10% no matter their strength.
+const MINT_TAG = 'mint';
+const MINT_MAX_PERCENT = 10; // the same mint-cap rule used across the whole mix catalog — a mint accent never exceeds this share
+
 function buildLiveMixFromMatched(matched){
-  const sorted = [...matched].sort((a,b)=> b.strength - a.strength);
-  const n = Math.min(sorted.length, 4);
-  const chosen = sorted.slice(0, n);
-  const baseSplits = { 2:[65,35], 3:[50,30,20], 4:[40,30,20,10] };
+  // Mint-tagged flavors (e.g. Frigate-style strength regulators) are
+  // accents by design, never a base — sorting everything by strength alone
+  // could put one of these first just because it has a high rating,
+  // handing the user a mix that's 50%+ a product meant for ≤10% use.
+  // Non-mint flavors always fill the base/secondary slots first; mint ones
+  // only ever land in the trailing slot(s), where the ratio table and the
+  // cap loop below keep them small.
+  const nonMint = matched.filter(f => !f.tags.includes(MINT_TAG)).sort((a,b)=> b.strength - a.strength);
+  const mintOnes = matched.filter(f => f.tags.includes(MINT_TAG)).sort((a,b)=> b.strength - a.strength);
+  const ordered = nonMint.length > 0 ? [...nonMint, ...mintOnes] : mintOnes;
+
+  const n = Math.min(ordered.length, 4);
+  const chosen = ordered.slice(0, n);
+  const baseSplits = { 1:[100], 2:[65,35], 3:[50,30,20], 4:[40,30,20,10] };
   let splits = [...baseSplits[n]];
   for (let i=1;i<chosen.length;i++){
-    if (chosen[i].tags.includes('mint') && splits[i] > 10){
-      const excess = splits[i]-10;
-      splits[i] = 10;
+    if (chosen[i].tags.includes(MINT_TAG) && splits[i] > MINT_MAX_PERCENT){
+      const excess = splits[i] - MINT_MAX_PERCENT;
+      splits[i] = MINT_MAX_PERCENT;
       splits[0] += excess;
     }
   }
@@ -2224,7 +2438,7 @@ function buildLiveMixCardHtml(m){
     const cat = CATEGORIES.find(c=>c.key===t);
     return `<span class="tag-pill">${cat ? cat.icon+' '+cat.label : t}</span>`;
   }).join('');
-  const recipeLines = m.recipe.map(item=>`<b>${item.t}</b> — ${item.p}%`).join('<br>');
+  const recipeLines = m.recipe.map(item=>`<b>${escapeHtml(item.t)}</b> — ${item.p}%`).join('<br>');
   return `
     <div class="mix-card">
       <div class="mix-top">
@@ -2241,13 +2455,16 @@ function buildLiveMixCardHtml(m){
 
 // ---------- Tab switching ----------
 document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const activateTab = ()=>{
+    document.querySelectorAll('.tab').forEach(t=>{ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     tab.classList.add('active');
+    tab.setAttribute('aria-selected','true');
     document.getElementById('view-' + tab.dataset.view).classList.add('active');
     if (tab.dataset.view === 'favorites') renderFavorites();
-  });
+  };
+  tab.addEventListener('click', activateTab);
+  tab.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activateTab(); } });
 });
 
 loadFavorites();
