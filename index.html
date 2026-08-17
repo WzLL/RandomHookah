@@ -2238,6 +2238,22 @@ function tightNorm(s){
 
 const FUZZY_MATCH_THRESHOLD = 0.5; // at least half of a flavor's meaningful words must show up to count as a fuzzy match
 
+// Sub-brand/product lines that appear on packaging without the parent
+// brand's name printed anywhere on the box — the vision model legitimately
+// reads just the sub-brand (e.g. "HiT"), with no mention of "Black Burn"
+// at all, because that's genuinely all that's visible. Maps the alias (as
+// it appears on the box) to the parent brand stored in the catalog, so
+// matching still finds the real flavor.
+const BRAND_ALIASES = {
+  'hit': 'blackburn',
+};
+function brandAliasPresent(d, catalogBrandNorm){
+  for (const alias in BRAND_ALIASES){
+    if (BRAND_ALIASES[alias] === catalogBrandNorm && d.includes(alias)) return true;
+  }
+  return false;
+}
+
 // Precomputed once at load, not on every matchDetectedToFlavor() call.
 // Normalizing/tokenizing all 270+ flavor names with regex is the actual
 // expensive part of matching (not the array scan itself) — caching it here
@@ -2260,7 +2276,7 @@ function matchDetectedToFlavor(detectedStr){
   const d = tightNorm(detectedStr);
 
   for (const idx of FLAVOR_MATCH_INDEX){
-    if (d.includes(idx.normBrand) && d.includes(idx.normName)){
+    if ((d.includes(idx.normBrand) || brandAliasPresent(d, idx.normBrand)) && d.includes(idx.normName)){
       return idx.flavor;
     }
   }
@@ -2278,7 +2294,7 @@ function matchDetectedToFlavor(detectedStr){
   let best = null;
   let bestScore = 0;
   for (const idx of FLAVOR_MATCH_INDEX){
-    const brandPresent = d.includes(idx.normBrand) || (idx.brandTokens.length > 0 && idx.brandTokens.every(bt => detectedTokens.has(bt)));
+    const brandPresent = d.includes(idx.normBrand) || (idx.brandTokens.length > 0 && idx.brandTokens.every(bt => detectedTokens.has(bt))) || brandAliasPresent(d, idx.normBrand);
     if (!brandPresent) continue;
 
     if (idx.nameTokens.length === 0) continue;
