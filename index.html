@@ -3036,6 +3036,14 @@ function buildLiveMixCandidates(matched, count){
   // Pick up to `count` candidates, preferring variety of base ingredient
   // so the suggestions actually look different from each other, not just
   // the same base with one ingredient swapped.
+  // Prefer longer (3-ingredient) combinations over 2-ingredient ones when
+  // both exist for the same base ingredient — without this, the variety
+  // pick below always grabs whichever candidate was generated first for a
+  // given base, and 2-ingredient pairs are always pushed before their
+  // 3-ingredient extensions above, so richer combos would never win even
+  // when one was found for that exact base.
+  candidates.sort((a,b) => b.recipe.length - a.recipe.length);
+
   const picked = [];
   const usedBases = new Set();
   for (const c of candidates){
