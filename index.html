@@ -511,6 +511,9 @@
     color: var(--smoke);
     box-shadow: inset 0 0 0 1px rgba(230,128,47,0.3);
   }
+  .tabbar-profile{
+    margin-bottom: 10px;
+  }
   .view{ display:none; }
   .view.active{ display:block; }
 
@@ -608,11 +611,13 @@
   <h1>Найди свой <em>вкус</em></h1>
   <p class="lead">Крути крепость по шкале от 1 до 10, отметь любимые вкусовые направления — покажем подходящие миксы.</p>
 
+  <div class="tabbar tabbar-profile" role="tablist">
+    <div class="tab" data-view="profile" role="tab" tabindex="0" aria-selected="false">Профиль</div>
+  </div>
   <div class="tabbar" role="tablist">
     <div class="tab active" data-view="picker" role="tab" tabindex="0" aria-selected="true">Подбор вкуса</div>
     <div class="tab" data-view="photo" role="tab" tabindex="0" aria-selected="false">Моя полка</div>
     <div class="tab" data-view="favorites" role="tab" tabindex="0" aria-selected="false">Избранное<span class="fav-count-badge" id="favCountBadge" style="display:none;">0</span></div>
-    <div class="tab" data-view="profile" role="tab" tabindex="0" aria-selected="false">Профиль</div>
   </div>
 
   <div class="view active" id="view-picker">
@@ -3053,7 +3058,6 @@ document.getElementById('reshuffleBtn').addEventListener('click', ()=>{
 // all, so it can safely be disabled/removed on the Worker side without
 // breaking anything here.
 const PHOTO_WORKER_URL = 'https://random-hookah-vision.f-a-serebrennikov.workers.dev';
-const APP_SHARED_KEY = '23489043';
 
 // Text the person types is untrusted input — escape before it ever hits
 // innerHTML, same principle as before, just no vision model in the loop now.
@@ -3201,9 +3205,17 @@ missingFlavorBtn.addEventListener('click', async ()=>{
   if (!text) return;
   missingFlavorBtn.disabled = true;
   try{
+    // Telegram signs initData with the bot's own token — the Worker verifies
+    // this signature server-side (see Worker code). No client-visible key
+    // involved at all. If initData is unavailable (app opened outside
+    // Telegram), the Worker will correctly reject the request — that's
+    // intended, not a bug: there is no legitimate "secret" a browser can
+    // hold that proves it's really inside Telegram, so outside-Telegram
+    // submissions are not authenticated and should not succeed.
+    const tgInitData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || '';
     await fetch(PHOTO_WORKER_URL + '/log-unknown', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-App-Key': APP_SHARED_KEY },
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tgInitData },
       body: JSON.stringify({ items: [text] })
     });
     missingFlavorStatus.style.display = 'block';
