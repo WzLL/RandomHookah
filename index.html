@@ -2697,12 +2697,18 @@ const FAVORITES_KEY = 'favorite_mix_ids';
 //      but stays on just this one browser/device.
 const tgCloud = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) || null;
 
+// Each function guards itself against tgCloud being null — callers that
+// already check `if (tgCloud)` first keep working exactly the same, but a
+// future call site that forgets that check gets a clean empty result
+// instead of an unhandled "Cannot read property 'getItem' of null".
 function cloudGetItem(key){
+  if (!tgCloud) return Promise.resolve(null);
   return new Promise((resolve)=>{
     tgCloud.getItem(key, (err, value)=> resolve(err ? null : value));
   });
 }
 function cloudSetItem(key, value){
+  if (!tgCloud) return Promise.reject(new Error('CloudStorage unavailable'));
   return new Promise((resolve, reject)=>{
     tgCloud.setItem(key, value, (err, success)=>{
       if (err) reject(new Error(err));
@@ -3059,6 +3065,17 @@ document.getElementById('reshuffleBtn').addEventListener('click', ()=>{
 // breaking anything here.
 const PHOTO_WORKER_URL = 'https://random-hookah-vision.f-a-serebrennikov.workers.dev';
 
+// Used on every search-as-you-type field (filters the flavor list on each
+// keystroke) so a fast typist on a slow phone doesn't trigger a filter pass
+// per character — waits for a short pause before actually filtering.
+function debounce(fn, delay = 180){
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // Text the person types is untrusted input — escape before it ever hits
 // innerHTML, same principle as before, just no vision model in the loop now.
 function escapeHtml(s){
@@ -3124,7 +3141,7 @@ function renderSearchResults(){
     el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); addThis(); } });
   });
 }
-shelfSearchInput.addEventListener('input', renderSearchResults);
+shelfSearchInput.addEventListener('input', debounce(renderSearchResults));
 
 function renderShelf(){
   shelfCount.textContent = myShelf.length;
@@ -3556,7 +3573,7 @@ function renderProfileStopBrandsList(){
 
 const profileBrandSearch = document.getElementById('profileBrandSearch');
 const profileBrandSearchResults = document.getElementById('profileBrandSearchResults');
-profileBrandSearch.addEventListener('input', ()=>{
+profileBrandSearch.addEventListener('input', debounce(()=>{
   const q = normSearch(profileBrandSearch.value);
   if (q.length < 1){ profileBrandSearchResults.innerHTML=''; return; }
   const allBrands = [...new Set(FLAVORS.map(f=>f.brand))].sort();
@@ -3575,7 +3592,7 @@ profileBrandSearch.addEventListener('input', ()=>{
     chipEl.addEventListener('click', addThis);
     chipEl.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); addThis(); } });
   });
-});
+}));
 
 // ---------- First-visit onboarding (same three questions as the Profile tab, shown once) ----------
 function renderOnboarding(){
@@ -3650,7 +3667,7 @@ function renderOnboardStopBrandsList(){
 
 const onboardBrandSearch = document.getElementById('onboardBrandSearch');
 const onboardBrandSearchResults = document.getElementById('onboardBrandSearchResults');
-onboardBrandSearch.addEventListener('input', ()=>{
+onboardBrandSearch.addEventListener('input', debounce(()=>{
   const q = normSearch(onboardBrandSearch.value);
   if (q.length < 1){ onboardBrandSearchResults.innerHTML=''; return; }
   const allBrands = [...new Set(FLAVORS.map(f=>f.brand))].sort();
@@ -3668,7 +3685,7 @@ onboardBrandSearch.addEventListener('input', ()=>{
     chipEl.addEventListener('click', addThis);
     chipEl.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); addThis(); } });
   });
-});
+}));
 
 async function finishOnboarding(){
   userProfile.hasOnboarded = true;
