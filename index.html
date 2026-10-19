@@ -656,7 +656,7 @@
     <div class="empty">Собранные под твой запрос миксы из 2-3 вкусов появятся здесь.</div>
   </div>
   <button class="reshuffle-btn" id="reshuffleBtn" style="display:none;">🔀 Показать другие варианты</button>
-  <p class="source-note" style="margin-top:-4px;">В базе — 1118 миксов (собраны алгоритмически из 587 реальных вкусов по тем же правилам миксологии: база ~50-90% + добавка/акцент). Это не рецепты с сайтов и не проверенные тысячами забитых чаш хиты — это идеи для эксперимента. Крепость смещена в сторону 5-9/10: выше этой планки не поднимается ни один готовый микс в базе, хотя отдельные акцентные вкусы-регуляторы крепости заявлены производителем на 10/10.</p>
+  <p class="source-note" style="margin-top:-4px;">В базе — 1120 миксов (собраны алгоритмически из 588 реальных вкусов по тем же правилам миксологии: база ~50-90% + добавка/акцент). Это не рецепты с сайтов и не проверенные тысячами забитых чаш хиты — это идеи для эксперимента. Крепость смещена в сторону 5-9/10: выше этой планки не поднимается ни один готовый микс в базе, хотя отдельные акцентные вкусы-регуляторы крепости заявлены производителем на 10/10.</p>
 
   <div class="section-title" style="margin-bottom:2px; margin-top:24px;">Подходящие вкусы соло</div>
   <p class="section-sub" id="resultsSub">Пока пусто — задай параметры выше.</p>
@@ -847,10 +847,10 @@ const FLAVORS = [
   { name:'Lavender', brand:'Bonche', strength:5, tags:['floral'], note:'Чистая лаванда, лёгкий цветочный профиль.' },
   { name:'360 Помело-грейпфрут', brand:'Sarma', strength:5, tags:['citrus'], note:'Терпкий помело с грейпфрутом на облегчённой линейке 360.', profile:'sour' },
   { name:'Чупа чупс', brand:'Nаш', strength:5, tags:['dessert','fruity'], note:'Леденцовая сладость, узнаваемый десертный вкус средней крепости.', profile:'sweet' },
-  { name:'Rose Grapefruit', brand:'Deus', strength:7, tags:['floral','citrus'], note:'Розово-грейпфрутовое сочетание — цветочная нота на терпкой цитрусовой основе.', profile:'sour' },
-  { name:'Blackberry Wine', brand:'Deus', strength:7, tags:['berry','drink'], note:'Ежевичное вино — плотный ягодный вкус с винным характером.', profile:'sour' },
-  { name:'Guinness', brand:'Deus', strength:7, tags:['drink'], note:'Тёмное пиво — плотный солодовый профиль средней крепости.' },
-  { name:'Love is', brand:'Deus', strength:6, tags:['dessert'], note:'Сладкий десертный вкус с мягкой подачей.' },
+  { name:'Rose Grapefruit', brand:'Deus', strength:7, tags:['floral','citrus'], note:'Розово-грейпфрутовое сочетание — цветочная нота на терпкой цитрусовой основе.', aliases:['Грейпфрут'], profile:'sour' },
+  { name:'Blackberry Wine', brand:'Deus', strength:7, tags:['berry','drink'], note:'Ежевичное вино — плотный ягодный вкус с винным характером.', aliases:['Ежевичное вино'], profile:'sour' },
+  { name:'Guinness', brand:'Deus', strength:7, tags:['drink'], note:'Тёмное пиво — плотный солодовый профиль средней крепости.', aliases:['Темное пиво'] },
+  { name:'Love is', brand:'Deus', strength:6, tags:['dessert'], note:'Сладкий десертный вкус с мягкой подачей.', aliases:['Клубнично-банановая жвачка'] },
   { name:'Клубничный мильфей', brand:'Starline', strength:4, tags:['berry','dessert'], note:'Клубника с кремовой выпечкой — лёгкий десертный вкус.', profile:'sweet' },
   { name:'Ежевика', brand:'Starline', strength:4, tags:['berry'], note:'Чистая ежевика, узнаваемый ягодный вкус без резкости.', profile:'sour' },
   { name:'Виноградное желе', brand:'Starline', strength:4, tags:['fruity','dessert'], note:'Виноградное желе — сладкий фруктовый вкус мягкой крепости.', profile:'sweet' },
@@ -1034,7 +1034,7 @@ const FLAVORS = [
   { name:'Papaya', brand:'Spectrum', strength:4, tags:['exotic','fruity'], note:'Тропическая папайя, линейка Classic.', profile:'sweet' },
   { name:'Крипто', brand:'Хулиган', strength:7, tags:['exotic','drink'], note:'Экзотическая газировка — один из последних релизов бренда.' },
   { name:'Коко', brand:'Хулиган', strength:7, tags:['mint','exotic'], note:'Мятный кокос — недавний релиз бренда.' },
-  { name:'White Peach', brand:'Deus', strength:7, tags:['fruity'], note:'Белый персик — один из последних релизов бренда.', profile:'sweet' },
+  { name:'White Peach', brand:'Deus', strength:7, tags:['fruity'], note:'Белый персик — один из последних релизов бренда.', aliases:['Белый персик'], profile:'sweet' },
   { name:'Персик', brand:'Северный', strength:5, tags:['fruity'], note:'Персик классической линейки — недавний релиз бренда.', profile:'sweet' },
   { name:'Арбуз', brand:'Северный Professional', strength:8, tags:['fruity'], note:'Сочный арбуз на крепкой линейке Professional.', profile:'sweet' },
   { name:'Цветочный', brand:'Северный Professional', strength:8, tags:['floral'], note:'Цветочный букет на крепкой линейке Professional.' },
@@ -1125,9 +1125,9 @@ const FLAVORS = [
   { name:'Mix — Персик-абрикос', brand:'Chabacco', strength:5, tags:['fruity'], note:'Сладкий персик с мякотью абрикоса и нотой косточки. Линейка Chabacco Mix.', profile:'sweet' },
   { name:'Mix — Скиттл', brand:'Chabacco', strength:5, tags:['fruity','dessert'], note:'Кисло-сладкий аромат популярных фруктовых конфет. Линейка Chabacco Mix.', profile:'sour' },
   { name:'Мармеладные мишки', brand:'Chabacco', strength:5, tags:['dessert'], note:'Кисло-сладкий аромат мармелада со вкусом ананаса.' },
-  { name:'Cherry Jelly', brand:'Deus', strength:7, tags:['berry','dessert'], note:'Вишнёвое желе — насыщенный десертно-ягодный вкус.', profile:'sour' },
-  { name:'Blueberry Yogurt', brand:'Deus', strength:7, tags:['berry','dessert'], note:'Черничный йогурт — сливочная ягодная кислинка.', profile:'sour' },
-  { name:'Green Apple', brand:'Deus', strength:7, tags:['fruity'], note:'Зелёное яблоко с характерной кислинкой.', profile:'sour' },
+  { name:'Cherry Jelly', brand:'Deus', strength:7, tags:['berry','dessert'], note:'Вишнёвое желе — насыщенный десертно-ягодный вкус.', aliases:['Вишневое желе'], profile:'sour' },
+  { name:'Blueberry Yogurt', brand:'Deus', strength:7, tags:['berry','dessert'], note:'Черничный йогурт — сливочная ягодная кислинка.', aliases:['Черничный йогурт'], profile:'sour' },
+  { name:'Green Apple', brand:'Deus', strength:7, tags:['fruity'], note:'Зелёное яблоко с характерной кислинкой.', aliases:['Зеленое яблоко'], profile:'sour' },
   { name:'Alcohol Line Cosmopolitan', brand:'Jent', strength:7, tags:['drink','citrus'], note:'Классический коктейль с яркими нотами клюквы, лайма и апельсинового ликёра. Линейка Alcohol Line.', profile:'sour' },
   { name:'Кокос', brand:'Bliss', strength:4, tags:['dessert'], note:'Сливочный кокос с нотками ванили и карамели, отличная база для миксов.' },
   { name:'Базилик', brand:'Bliss', strength:4, tags:['spice'], note:'Приличный травяной базилик в лёгкой линейке, чувствителен к жару.' },
@@ -1350,23 +1350,23 @@ const FLAVORS = [
   { name:'Черника йогурт', brand:'Nаш', strength:5, tags:['berry','dessert'], note:'Черника со сливочным йогуртом, линейка White Line.', profile:'sour' },
   { name:'Арбуз Дыня', brand:'Nаш', strength:5, tags:['fruity'], note:'Арбуз с дыней, линейка White Line.', profile:'sweet' },
   { name:'White Grape', brand:'Black Burn', strength:7, tags:['fruity'], note:'Белый виноград, основная линейка.', aliases:['Белый Виноград'], profile:'sweet' },
-  { name:'Catmint', brand:'Deus', strength:7, tags:['mint','floral'], note:'Котовник (кошачья мята) — самый обсуждаемый и высоко оценённый вкус бренда, основная линейка.' },
+  { name:'Catmint', brand:'Deus', strength:7, tags:['mint','floral'], note:'Котовник (кошачья мята) — самый обсуждаемый и высоко оценённый вкус бренда, основная линейка.', aliases:['Парфюмная мята'] },
   { name:'Hardkor', brand:'Deus', strength:7, tags:['parfum'], note:'Парфюмерная композиция в духе Hermès Rhubarbe — ревеневый акцент. Линейка Perfume.' },
   { name:'The Voice of the snake', brand:'Deus', strength:7, tags:['parfum'], note:'Насыщенная парфюмерная композиция, линейка Perfume.' },
-  { name:'Strawberry', brand:'Deus', strength:7, tags:['berry'], note:'Клубника, основная линейка.', profile:'sweet' },
-  { name:'Sour Berries', brand:'Deus', strength:7, tags:['berry'], note:'Кислые ягоды, основная линейка.', profile:'sour' },
-  { name:'Champagne', brand:'Deus', strength:7, tags:['drink'], note:'Сладкое игристое вино Асти с лёгкой кислинкой и шипучим эффектом.', profile:'sweet' },
+  { name:'Strawberry', brand:'Deus', strength:7, tags:['berry'], note:'Клубника, основная линейка.', aliases:['Клубника'], profile:'sweet' },
+  { name:'Sour Berries', brand:'Deus', strength:7, tags:['berry'], note:'Кислые ягоды, основная линейка.', aliases:['Кислые ягоды'], profile:'sour' },
+  { name:'Champagne', brand:'Deus', strength:7, tags:['drink'], note:'Сладкое игристое вино Асти с лёгкой кислинкой и шипучим эффектом.', aliases:['Игристое вино'], profile:'sweet' },
   { name:'Второе высшее', brand:'Deus', strength:7, tags:['fruity','tea'], note:'Лимитированная соусированная сигара — коллаборация с Артемием Лебедевым. Сушёный абрикос, ягоды, слива, сладкий чёрный чай, сдобное тесто. Линейка Cigar.', profile:'sweet' },
-  { name:'Skittles', brand:'Deus', strength:7, tags:['fruity','dessert'], note:'Кисло-сладкие фруктовые конфеты, основная линейка.', profile:'sweet' },
-  { name:'Yuzu', brand:'Deus', strength:7, tags:['citrus'], note:'Взрывной цитрус юдзу, основная линейка.', profile:'sour' },
-  { name:'Peonies', brand:'Deus', strength:7, tags:['floral'], note:'Насыщенный цветочный аромат пионов, основная линейка.' },
-  { name:'Marmelade', brand:'Deus', strength:7, tags:['fruity','dessert'], note:'Кисло-сладкий фруктовый мармелад, основная линейка.' },
-  { name:'Watermelon Halls', brand:'Deus', strength:7, tags:['fruity','mint'], note:'Арбуз с мятным холодком, основная линейка.', profile:'sweet' },
-  { name:'Pine', brand:'Deus', strength:7, tags:['spice'], note:'Пихта — хвойный лес в чаше, основная линейка.' },
-  { name:'Orange Tic Tac', brand:'Deus', strength:7, tags:['citrus','dessert'], note:'Апельсиновое драже, основная линейка.', profile:'sweet' },
-  { name:'Ultima', brand:'Deus', strength:7, tags:['spice','dessert'], note:'Грецкий орех с имбирём, основная линейка.' },
-  { name:'Passion Fruit', brand:'Deus', strength:7, tags:['exotic','fruity'], note:'Маракуйя, основная линейка.', profile:'sour' },
-  { name:'Plum Coffe', brand:'Deus', strength:7, tags:['fruity','spice'], note:'Кофе с черносливом — хорошо сочетается в миксах, сильный соло-вкус. Основная линейка.', profile:'sweet' },
+  { name:'Skittles', brand:'Deus', strength:7, tags:['fruity','dessert'], note:'Кисло-сладкие фруктовые конфеты, основная линейка.', aliases:['Скитлз'], profile:'sweet' },
+  { name:'Yuzu', brand:'Deus', strength:7, tags:['citrus'], note:'Взрывной цитрус юдзу, основная линейка.', aliases:['Юдзу'], profile:'sour' },
+  { name:'Peonies', brand:'Deus', strength:7, tags:['floral'], note:'Насыщенный цветочный аромат пионов, основная линейка.', aliases:['Пионы'] },
+  { name:'Marmelade', brand:'Deus', strength:7, tags:['fruity','dessert'], note:'Кисло-сладкий фруктовый мармелад, основная линейка.', aliases:['Кисло-сладкий мармелад'] },
+  { name:'Watermelon Halls', brand:'Deus', strength:7, tags:['fruity','mint'], note:'Арбуз с мятным холодком, основная линейка.', aliases:['Арбузный Холс'], profile:'sweet' },
+  { name:'Pine', brand:'Deus', strength:7, tags:['spice'], note:'Пихта — хвойный лес в чаше, основная линейка.', aliases:['Пихта'] },
+  { name:'Orange Tic Tac', brand:'Deus', strength:7, tags:['citrus','dessert'], note:'Апельсиновое драже, основная линейка.', aliases:['Апельсиновое драже'], profile:'sweet' },
+  { name:'Ultima', brand:'Deus', strength:7, tags:['spice','dessert'], note:'Грецкий орех с имбирём, основная линейка.', aliases:['Грецкий орех, имбирь'] },
+  { name:'Passion Fruit', brand:'Deus', strength:7, tags:['exotic','fruity'], note:'Маракуйя, основная линейка.', aliases:['Маракуйя'], profile:'sour' },
+  { name:'Plum Coffe', brand:'Deus', strength:7, tags:['fruity','spice'], note:'Кофе с черносливом — хорошо сочетается в миксах, сильный соло-вкус. Основная линейка.', aliases:['Кофе-чернослив'], profile:'sweet' },
   { name:'Hookah Place', brand:'Deus', strength:8, tags:['classic'], note:'Фирменный вкус, крепость 8-9/10 — на верхней границе для бренда. Основная линейка.' },
   { name:'Китана (Гранатовый Чай)', brand:'Хулиган', strength:7, tags:['berry','tea'], note:'Гранатовый чай — новый вкус основной линейки, сентябрь 2026.', profile:'sweet' },
   { name:'HiT 41 (Фейхоа, Хвоя, Эвкалипт)', brand:'Black Burn', strength:5, tags:['exotic','spice'], note:'Фейхоа с хвоей и эвкалиптом, линейка HiT.' },
@@ -1389,6 +1389,7 @@ const FLAVORS = [
   { name:'Малина клубника', brand:'Morpheus', strength:4, tags:['berry'], note:'Сладкая клубника с малиновой нотой. Основная линейка, средне-лёгкая крепость.', profile:'sweet' },
   { name:'Клюква джин', brand:'Morpheus', strength:4, tags:['berry','drink'], note:'Клюква с можжевеловой ноткой джина; вкус на любителя. Основная линейка, средне-лёгкая крепость.', profile:'sour' },
   { name:'Ананас и тёмные ягоды', brand:'Morpheus', strength:4, tags:['exotic','berry'], note:'Травянистый ананас с тёмными ягодами и парфюмерной ноткой. Основная линейка, средне-лёгкая крепость.', profile:'sour' },
+  { name:'Дыня йогурт', brand:'Nаш', strength:5, tags:['fruity','dessert'], note:'Густой сливочный йогурт с яркой сладкой дыней, линейка White Line.', profile:'sweet' },
 ];
 
 // ---------- Strength word ----------
@@ -2719,6 +2720,8 @@ const MIX_RECIPES = [
   { name:'Прохладительный лимонад', tags:['berry','drink','citrus'], recipe:[{t:'Morpheus Клюква джин', p:60, s:4}, {t:'Musthave Lemon Tonic', p:40, s:5}], note:'Прохладительный лимонад — это домашний лимонад со льдом. Клюква джин составляет основу (~60%), Lemon Tonic добавляет цитрусовую терпкость (~40%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Диковинный ягодник', tags:['exotic','berry','dessert'], recipe:[{t:'Morpheus Ананас и тёмные ягоды', p:65, s:4}, {t:'Bliss Кокос', p:35, s:4}], note:'Диковинный ягодник — это сбор ягод прямо с куста. Ананас и тёмные ягоды составляет основу (~65%), Кокос добавляет десертную сладость (~35%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
   { name:'Багровый тропик', tags:['exotic','berry','fruity'], recipe:[{t:'Morpheus Ананас и тёмные ягоды', p:65, s:4}, {t:'Spectrum Sunny Melon', p:35, s:4}], note:'Багровый тропик — это влажный тропический воздух. Ананас и тёмные ягоды составляет основу (~65%), Sunny Melon добавляет фруктовую сочность (~35%). Крепость ~4/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Сочный нектар', tags:['fruity','dessert','berry'], recipe:[{t:'Nаш Дыня йогурт', p:65, s:5}, {t:'Sarma Клубника со сливками', p:35, s:4}], note:'Сочный нектар — это густой сладкий нектар в каждом глотке. Дыня йогурт составляет основу (~65%), Клубника со сливками добавляет ягодную кислинку (~35%). Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
+  { name:'Освежающий нектар', tags:['fruity','dessert','citrus','mint'], recipe:[{t:'Nаш Дыня йогурт', p:60, s:5}, {t:'Bliss Лайм', p:30, s:4}, {t:'Musthave Ice Mint', p:10, s:5}], note:'Освежающий нектар — это густой сладкий нектар в каждом глотке. Дыня йогурт составляет основу (~60%), Лайм добавляет цитрусовую терпкость (~30%), Ice Mint закрывает микс лёгким холодком, не больше 10%. Крепость ~5/10 — лёгкий вариант для спокойного долгого вечера.' },
 ];
 
 // ---------- Favorites (liked mixes) ----------
@@ -2880,6 +2883,7 @@ function buildMixCardHtml(m, opts){
         </div>
       </div>
       ${matchLabel}
+      ${opts.extraHtml || ''}
       <div class="card-tags">${tagsHtml}</div>
       <p class="mix-recipe">${recipeLines}</p>
       <p class="card-note">${m.note}</p>
@@ -3208,9 +3212,36 @@ function renderShelf(){
 
 function renderShelfMix(){
   if (myShelf.length < 2){
-    shelfMixResult.innerHTML = myShelf.length === 1
-      ? `<p class="ts" style="font-size:13px; color:var(--muted);">Добавь ещё хотя бы один вкус, чтобы собрать микс.</p>`
-      : '';
+    if (myShelf.length === 0){
+      shelfMixResult.innerHTML = '';
+      return;
+    }
+    // Один вкус на полке: показываем все готовые миксы из базы с этим
+    // вкусом и подписываем, каких ингредиентов не хватает на полке.
+    const only = myShelf[0];
+    const onlyKey = `${only.brand} ${only.name}`;
+    const withIt = MIX_RECIPES
+      .filter(m=>!isMixStopped(m.recipe) && m.recipe.some(r=>r.t === onlyKey))
+      .map(m=>{
+        const missing = m.recipe.filter(r=>r.t !== onlyKey).map(r=>r.t);
+        return { ...m, missing, strength: personalizedRecipeStrength(m.recipe) };
+      })
+      .sort((a,b)=> a.missing.length - b.missing.length);
+    const hint = `<p class="ts" style="font-size:13px; color:var(--muted);">Добавь ещё хотя бы один вкус, чтобы собрать микс именно из твоей полки.</p>`;
+    if (withIt.length === 0){
+      shelfMixResult.innerHTML = hint;
+      return;
+    }
+    const LIMIT = 12;
+    const shown = withIt.slice(0, LIMIT);
+    const rest = withIt.length - shown.length;
+    shelfMixResult.innerHTML = hint + `<div class="photo-result-block">
+      <div class="photo-result-title">Миксы из базы с вкусом «${escapeHtml(onlyKey)}»</div>
+      ${shown.map(m=>buildMixCardHtml(m, {
+        extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
+      })).join('')}
+      ${rest > 0 ? `<p class="ts" style="font-size:13px; color:var(--muted);">И ещё миксов: ${rest}. Добавь вкусы на полку, чтобы увидеть остальные.</p>` : ''}
+    </div>`;
     return;
   }
 
