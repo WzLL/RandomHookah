@@ -3268,6 +3268,31 @@ function renderShelfMix(){
     </div>`;
   }
 
+  // Сценарий 1б: готовые миксы из базы, где есть хотя бы один вкус с полки,
+  // но не хватает остальных ингредиентов. Подписываем, чего не хватает,
+  // чтобы было видно, что докупить/добавить на полку.
+  const partialMatches = MIX_RECIPES
+    .filter(m=>!isMixStopped(m.recipe))
+    .map(m=>{
+      const have = m.recipe.filter(r=>shelfFulls.has(r.t)).length;
+      const missing = m.recipe.filter(r=>!shelfFulls.has(r.t)).map(r=>r.t);
+      return { ...m, have, missing, strength: personalizedRecipeStrength(m.recipe) };
+    })
+    .filter(m=>m.have > 0 && m.missing.length > 0)
+    .sort((a,b)=> (b.have - a.have) || (a.missing.length - b.missing.length));
+  if (partialMatches.length > 0){
+    const PARTIAL_LIMIT = 6;
+    const shownPartial = partialMatches.slice(0, PARTIAL_LIMIT);
+    const restPartial = partialMatches.length - shownPartial.length;
+    html += `<div class="photo-result-block">
+      <div class="photo-result-title">Миксы из базы с твоими вкусами — не хватает части ингредиентов</div>
+      ${shownPartial.map(m=>buildMixCardHtml(m, {
+        extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
+      })).join('')}
+      ${restPartial > 0 ? `<p class="ts" style="font-size:13px; color:var(--muted);">И ещё миксов: ${restPartial}.</p>` : ''}
+    </div>`;
+  }
+
   // Сценарий 2 (вспомогательный): если готовых вариантов в базе мало или
   // не нашлось вообще — предлагаем несколько РАЗНЫХ живых миксов,
   // собранных прямо на лету из разных сочетаний полки. Не один микс,
