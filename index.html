@@ -3226,6 +3226,14 @@ function renderShelf(){
   renderShelfMix();
 }
 
+function toggleShelfMore(btn){
+  const box = btn.previousElementSibling;
+  if (!box) return;
+  const open = box.hidden;
+  box.hidden = !open;
+  btn.textContent = open ? 'Скрыть' : `Показать ещё (${btn.dataset.more})`;
+}
+
 function renderShelfMix(){
   if (myShelf.length < 2){
     if (myShelf.length === 0){
@@ -3256,7 +3264,10 @@ function renderShelfMix(){
       ${shown.map(m=>buildMixCardHtml(m, {
         extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
       })).join('')}
-      ${rest > 0 ? `<p class="ts" style="font-size:13px; color:var(--muted);">И ещё миксов: ${rest}. Добавь вкусы на полку, чтобы увидеть остальные.</p>` : ''}
+      ${rest > 0 ? `<div class="shelf-more-box" hidden>${withIt.slice(LIMIT).map(m=>buildMixCardHtml(m, {
+        extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
+      })).join('')}</div>
+      <button type="button" class="chip" style="margin-top:10px;" onclick="toggleShelfMore(this)" data-more="${rest}">Показать ещё (${rest})</button>` : ''}
     </div>`;
     return;
   }
@@ -3305,7 +3316,10 @@ function renderShelfMix(){
       ${shownPartial.map(m=>buildMixCardHtml(m, {
         extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
       })).join('')}
-      ${restPartial > 0 ? `<p class="ts" style="font-size:13px; color:var(--muted);">И ещё миксов: ${restPartial}.</p>` : ''}
+      ${restPartial > 0 ? `<div class="shelf-more-box" hidden>${partialMatches.slice(PARTIAL_LIMIT).map(m=>buildMixCardHtml(m, {
+        extraHtml: `<div class="match-tag">Не хватает на полке: ${m.missing.map(escapeHtml).join(', ')}</div>`
+      })).join('')}</div>
+      <button type="button" class="chip" style="margin-top:10px;" onclick="toggleShelfMore(this)" data-more="${restPartial}">Показать ещё (${restPartial})</button>` : ''}
     </div>`;
   }
 
