@@ -788,7 +788,7 @@ window.__tgReady = new Promise(function(resolve){
     </div>
     <button type="button" class="link-btn block" data-open-policy>Политика конфиденциальности</button>
 
-    <p class="source-note" id="appVersion" style="margin-top:22px; opacity:.7; text-align:center; border:0; background:none; padding:0; font-size:0.75rem;">Версия от 09.11.2026, 10:40</p>
+    <p class="source-note" id="appVersion" style="margin-top:22px; opacity:.7; text-align:center; border:0; background:none; padding:0; font-size:0.75rem;">Версия от 09.11.2026, 15:20</p>
   </div>
 </div>
 
@@ -3159,7 +3159,7 @@ function buildMixCardHtml(m, opts){
     const cat = CATEGORIES.find(c=>c.key===t);
     return `<span class="tag-pill">${cat ? cat.icon+' '+cat.label : t}</span>`;
   }).join('');
-  const recipeLines = m.recipe.map(item=>`<b>${item.t}</b> — ${item.p}%`).join('<br>');
+  const recipeLines = m.recipe.map(item=>`<b>${escapeHtml(item.t)}</b> — ${item.p}%`).join('<br>');
   const liked = favoriteIds.has(m.id);
   const matchLabel = (opts.showMatch && typeof m.diff === 'number')
     ? `<div class="match-tag">${m.diff === 0 ? 'Точное попадание по крепости' : `Крепость отличается на ${m.diff}`}</div>`
@@ -3171,14 +3171,14 @@ function buildMixCardHtml(m, opts){
       <div class="strength-feedback">
         <span class="sf-label">Крепость ощущается иначе?</span>
         <span class="sf-btns">
-        <button class="sf-btn" onclick="adjustBrandShift('${baseBrand}', -1)" aria-label="${baseBrand} кажется слабее заявленного">− слабее</button>
-        <button class="sf-btn" onclick="adjustBrandShift('${baseBrand}', 1)" aria-label="${baseBrand} кажется крепче заявленного">+ крепче</button>
+        <button class="sf-btn" data-brand="${escapeHtml(baseBrand)}" onclick="adjustBrandShift(this.dataset.brand, -1)" aria-label="${escapeHtml(baseBrand)} кажется слабее заявленного">− слабее</button>
+        <button class="sf-btn" data-brand="${escapeHtml(baseBrand)}" onclick="adjustBrandShift(this.dataset.brand, 1)" aria-label="${escapeHtml(baseBrand)} кажется крепче заявленного">+ крепче</button>
         </span>
       </div>` : '';
   return `
     <div class="mix-card">
       <div class="mix-top">
-        <div class="mix-name">${m.name}</div>
+        <div class="mix-name">${escapeHtml(m.name)}</div>
         <div class="mix-actions">
           <span class="mix-rating">${m.strength}/10</span>
           <button class="like-btn ${liked?'liked':''}" onclick="toggleFavorite('${m.id}')" title="${liked?'Убрать из избранного':'В избранное'}" aria-label="${liked?'Убрать из избранного':'Добавить в избранное'}" aria-pressed="${liked}">${liked?'♥':'♡'}</button>
@@ -3188,7 +3188,7 @@ function buildMixCardHtml(m, opts){
       ${opts.extraHtml || ''}
       <div class="card-tags">${tagsHtml}</div>
       <p class="mix-recipe">${recipeLines}</p>
-      <p class="card-note">${m.note}</p>
+      <p class="card-note">${escapeHtml(m.note)}</p>
       ${feedbackHtml}
     </div>
   `;
@@ -3873,7 +3873,7 @@ function buildLiveMixCardHtml(m){
   return `
     <div class="mix-card">
       <div class="mix-top">
-        <div class="mix-name">${m.name}</div>
+        <div class="mix-name">${escapeHtml(m.name)}</div>
         <div class="mix-actions">
           <span class="mix-rating">${m.strength}/10</span>
         </div>
@@ -3897,14 +3897,23 @@ async function loadProfile(){
       raw = localStorage.getItem(PROFILE_KEY);
     }
     if (raw){
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(raw) || {};
+      // Всё, что пришло из хранилища, проверяем: только известные категории и бренды,
+      // числа — в разумных пределах. Так испорченные или подделанные данные не ломают приложение.
+      const knownBrands = new Set(FLAVORS.map(f=>f.brand));
+      const knownCats = new Set(CATEGORIES.map(c=>c.key));
+      const num = (v)=>{ v = Number(v); return Number.isFinite(v) ? Math.max(-3, Math.min(3, v)) : 0; };
+      const shifts = {};
+      if (parsed.perBrandShift && typeof parsed.perBrandShift === 'object' && !Array.isArray(parsed.perBrandShift)){
+        Object.keys(parsed.perBrandShift).forEach(k=>{ if (knownBrands.has(k)) shifts[k] = num(parsed.perBrandShift[k]); });
+      }
       userProfile = {
-        stopTags: parsed.stopTags || [],
-        stopBrands: parsed.stopBrands || [],
-        strengthShift: parsed.strengthShift || 0,
-        perBrandShift: parsed.perBrandShift || {},
-        hasOnboarded: parsed.hasOnboarded || false,
-        ageConfirmed: parsed.ageConfirmed || false,
+        stopTags: Array.isArray(parsed.stopTags) ? parsed.stopTags.filter(t=>knownCats.has(t)) : [],
+        stopBrands: Array.isArray(parsed.stopBrands) ? parsed.stopBrands.filter(b=>typeof b === 'string' && knownBrands.has(b)) : [],
+        strengthShift: num(parsed.strengthShift),
+        perBrandShift: shifts,
+        hasOnboarded: parsed.hasOnboarded === true,
+        ageConfirmed: parsed.ageConfirmed === true,
       };
     }
   }catch(e){
@@ -4379,7 +4388,7 @@ window.__tgReady.then(()=>{
 });
 </script>
 <script>
-try{var av=document.getElementById('appVersion');if(av&&typeof FLAVORS!=='undefined'&&typeof MIX_RECIPES!=='undefined'){av.textContent='Версия от 09.11.2026, 10:40 · вкусов: '+FLAVORS.length+' · миксов: '+MIX_RECIPES.length;}}catch(e){}
+try{var av=document.getElementById('appVersion');if(av&&typeof FLAVORS!=='undefined'&&typeof MIX_RECIPES!=='undefined'){av.textContent='Версия от 09.11.2026, 15:20 · вкусов: '+FLAVORS.length+' · миксов: '+MIX_RECIPES.length;}}catch(e){}
 </script>
 </body>
 </html>
