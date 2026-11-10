@@ -788,7 +788,7 @@ window.__tgReady = new Promise(function(resolve){
     </div>
     <button type="button" class="link-btn block" data-open-policy>Политика конфиденциальности</button>
 
-    <p class="source-note" id="appVersion" style="margin-top:22px; opacity:.7; text-align:center; border:0; background:none; padding:0; font-size:0.75rem;">Версия от 09.11.2026, 15:20</p>
+    <p class="source-note" id="appVersion" style="margin-top:22px; opacity:.7; text-align:center; border:0; background:none; padding:0; font-size:0.75rem;">Версия от 10.11.2026, 10:10</p>
   </div>
 </div>
 
@@ -844,7 +844,8 @@ window.__tgReady = new Promise(function(resolve){
     <h3>3. Какие данные и где хранятся</h3>
     <p><b>Профиль, избранное и «Моя полка».</b> Исключённые категории и бренды, поправка к крепости, отметка о подтверждении возраста, избранные миксы и список вкусов на полке хранятся в облачном хранилище Telegram, привязанном к вашему аккаунту. Если оно недоступно, данные хранятся в памяти браузера на вашем устройстве. Владелец приложения не получает эти данные и не может их просматривать.</p>
     <p><b>Форма «Не нашёл свой вкус».</b> Название, которое вы вводите (до 50 символов), и дата отправки сохраняются на сервере Cloudflare в общем списке. В списке нет вашего имени, идентификатора Telegram и другой информации о вас. Сервер проверяет подпись Telegram, чтобы убедиться, что запрос пришёл из приложения, и не сохраняет её. Не вводите в это поле личные данные.</p>
-    <p><b>Служебные данные.</b> Как и любой интернет-сервис, хостинг (GitHub Pages) и Cloudflare могут технически обрабатывать IP-адрес при передаче запросов. Приложение не использует cookie, аналитику и рекламные трекеры.</p>
+    <p><b>Счётчик посетителей.</b> После подтверждения возраста приложение не чаще раза в сутки отправляет на сервер Cloudflare запрос, подписанный Telegram. Сервер проверяет подпись, превращает идентификатор аккаунта в короткий необратимый код и записывает только этот код с датой, чтобы посчитать, сколько разных людей открывает приложение. Имя, имя пользователя и идентификатор Telegram не сохраняются, владелец видит только числа по дням. Коды и счётчики удаляются автоматически через 90 дней.</p>
+    <p><b>Служебные данные.</b> Как и любой интернет-сервис, хостинг (GitHub Pages) и Cloudflare могут технически обрабатывать IP-адрес при передаче запросов. Приложение не использует cookie и рекламные трекеры.</p>
 
     <h3>4. Сторонние сервисы</h3>
     <p>Telegram (запуск приложения, загрузка его скрипта, облачное хранилище), GitHub Pages (размещение страницы), Cloudflare (приём формы). Шрифты загружаются из самого приложения, без обращения к сторонним серверам.</p>
@@ -853,7 +854,7 @@ window.__tgReady = new Promise(function(resolve){
     <p>Чтобы приложение помнило ваши настройки и чтобы пополнять базу вкусов. Основание — ваше согласие: подтверждение возраста и отметка согласия под формой.</p>
 
     <h3>6. Сроки хранения и удаление</h3>
-    <p>Профиль, избранное и полка хранятся, пока вы их не удалите. Удалить всё можно в любой момент кнопкой «Удалить мои данные» на вкладке «Профиль» — это же отзывает согласие. Названия из формы хранятся в списке, пока владелец его не очистит. Если хотите удалить свою запись, напишите по контакту выше и укажите отправленный текст.</p>
+    <p>Профиль, избранное и полка хранятся, пока вы их не удалите. Удалить всё можно в любой момент кнопкой «Удалить мои данные» на вкладке «Профиль» — это же отзывает согласие. Названия из формы хранятся в списке, пока владелец его не очистит. Коды счётчика посетителей нельзя связать с вами и удаляются сами через 90 дней. Если хотите удалить свою запись, напишите по контакту выше и укажите отправленный текст.</p>
 
     <h3>7. Ваши права</h3>
     <p>Вы можете в любой момент удалить свои данные, отозвать согласие и обратиться с вопросом о том, как обрабатываются данные.</p>
@@ -3921,6 +3922,7 @@ async function loadProfile(){
   }
   renderProfileView();
   refreshPickerStopState();
+  if (userProfile.ageConfirmed) pingVisit();
   if (!userProfile.ageConfirmed){
     openAgeGate();
   } else if (!userProfile.hasOnboarded){
@@ -4341,6 +4343,7 @@ function openAgeGate(){
 document.getElementById('ageYesBtn').addEventListener('click', ()=>{
   userProfile.ageConfirmed = true;
   saveProfile();
+  pingVisit();
   closeLayer('ageOverlay');
   if (!userProfile.hasOnboarded){ renderOnboarding(); openOnboardDialog(); }
 });
@@ -4374,10 +4377,32 @@ document.getElementById('deleteDataYes').addEventListener('click', async ()=>{
       await new Promise((resolve)=>{ tgCloud.removeItems(keys, ()=>resolve()); });
     }
   }catch(e){}
-  keys.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  keys.concat([PING_KEY]).forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
   showToast('Данные удалены.');
   setTimeout(()=>{ location.reload(); }, 600);
 });
+
+// Анонимный счётчик посетителей: после подтверждения возраста, не чаще раза в сутки с устройства.
+// Сервер получает только подпись Telegram и сохраняет необратимый код (см. политику, раздел 3).
+function pingVisit(){
+  try{
+    if (!userProfile.ageConfirmed) return;
+    const tgInit = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || '';
+    if (!tgInit) return;
+    // «сутки» по Екатеринбургу (UTC+5) — так же, как считает сервер
+    const day = new Date(Date.now() + 5 * 3600 * 1000).toISOString().slice(0, 10);
+    try{ if (localStorage.getItem(PING_KEY) === day) return; }catch(e){}
+    fetch(PHOTO_WORKER_URL + '/ping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tgInit },
+      body: '{}',
+      keepalive: true
+    }).then((r)=>{
+      if (r && r.ok){ try{ localStorage.setItem(PING_KEY, day); }catch(e){} }
+    }).catch(()=>{});
+  }catch(e){}
+}
+const PING_KEY = 'rh_last_ping';
 
 window.__tgReady.then(()=>{
   refreshTgCloud();
@@ -4388,7 +4413,7 @@ window.__tgReady.then(()=>{
 });
 </script>
 <script>
-try{var av=document.getElementById('appVersion');if(av&&typeof FLAVORS!=='undefined'&&typeof MIX_RECIPES!=='undefined'){av.textContent='Версия от 09.11.2026, 15:20 · вкусов: '+FLAVORS.length+' · миксов: '+MIX_RECIPES.length;}}catch(e){}
+try{var av=document.getElementById('appVersion');if(av&&typeof FLAVORS!=='undefined'&&typeof MIX_RECIPES!=='undefined'){av.textContent='Версия от 10.11.2026, 10:10 · вкусов: '+FLAVORS.length+' · миксов: '+MIX_RECIPES.length;}}catch(e){}
 </script>
 </body>
 </html>
